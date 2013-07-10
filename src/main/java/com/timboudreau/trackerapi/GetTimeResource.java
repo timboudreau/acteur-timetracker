@@ -90,10 +90,10 @@ class GetTimeResource extends Page {
         @Override
         public void operationComplete(ChannelFuture future) throws Exception {
             if (first.compareAndSet(true, false)) {
-                future = future.channel().write(openBracket.copy());
+                future = future.channel().writeAndFlush(openBracket.copy());
             }
             if (!cur.hasNext()) {
-                future = future.channel().write(closeBracket.copy());
+                future = future.channel().writeAndFlush(closeBracket.copy());
                 if (!evt.isKeepAlive()) {
                     future.addListener(ChannelFutureListener.CLOSE);
                 }
@@ -102,7 +102,7 @@ class GetTimeResource extends Page {
             DBObject obj = cur.next();
             Map<?, ?> m = obj.toMap();
             ByteBuf b = Unpooled.wrappedBuffer(mapper.writeValueAsBytes(m));
-            future = future.channel().write(b);
+            future = future.channel().writeAndFlush(b);
             if (cur.hasNext()) {
                 future.channel().write(comma.copy());
             }

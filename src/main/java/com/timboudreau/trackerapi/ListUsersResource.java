@@ -64,10 +64,10 @@ class ListUsersResource extends Page {
         @Override
         public void operationComplete(ChannelFuture future) throws Exception {
             if (first.compareAndSet(true, false)) {
-                future = future.channel().write(Unpooled.wrappedBuffer("[\n".getBytes()));
+                future.channel().writeAndFlush(Unpooled.wrappedBuffer("[\n".getBytes()));
             }
             if (!cursor.hasNext()) {
-                future = future.channel().write(Unpooled.wrappedBuffer("]\n".getBytes()));
+                future = future.channel().writeAndFlush(Unpooled.wrappedBuffer("]\n".getBytes()));
                 if (!evt.isKeepAlive()) {
                     future.addListener(CLOSE);
                 }
@@ -76,9 +76,9 @@ class ListUsersResource extends Page {
                 Map<?, ?> m = obj.toMap();
                 m.remove(pass);
                 m.remove(origPass);
-                future = future.channel().write(Unpooled.wrappedBuffer(mapper.writeValueAsBytes(m)));
+                future = future.channel().writeAndFlush(Unpooled.wrappedBuffer(mapper.writeValueAsBytes(m)));
                 if (cursor.hasNext()) {
-                    future = future.channel().write(Unpooled.wrappedBuffer(",\n".getBytes()));
+                    future = future.channel().writeAndFlush(Unpooled.wrappedBuffer(",\n".getBytes()));
                 }
                 future.addListener(this);
             }
