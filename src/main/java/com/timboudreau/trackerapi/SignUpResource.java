@@ -133,7 +133,7 @@ class SignUpResource extends Page {
             Map m = nue.toMap();
             m.remove(pass);
             m.remove(origPass);
-            future = future.channel().writeAndFlush(
+            future = future.channel().write(
                     Unpooled.wrappedBuffer(mapper.writeValueAsBytes(m)));
             if (!evt.isKeepAlive()) {
                 future.addListener(CLOSE);
