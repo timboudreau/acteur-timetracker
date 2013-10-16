@@ -4,7 +4,7 @@ import com.timboudreau.trackerapi.support.Intervals;
 import com.google.inject.Inject;
 import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.ActeurFactory;
-import com.mastfrog.acteur.Event;
+import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.Page;
 import com.mastfrog.acteur.util.Method;
 import com.mongodb.BasicDBObject;
@@ -47,7 +47,7 @@ final class TotalTimeResource extends Page {
     private static class TotalGetter extends Acteur {
 
         @Inject
-        public TotalGetter(Event evt, DBCollection collection, BasicDBObject query) throws IOException {
+        public TotalGetter(HttpEvent evt, DBCollection collection, BasicDBObject query) throws IOException {
             query.put(type, time);
             query.remove(detail);
 

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.ActeurFactory;
-import com.mastfrog.acteur.Event;
+import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.Page;
 import com.mastfrog.acteur.util.Method;
 import com.mongodb.DBCollection;
@@ -41,11 +41,11 @@ class ListUsersResource extends Page {
 
         final DBCursor cursor;
         final AtomicBoolean first = new AtomicBoolean(true);
-        private final Event evt;
+        private final HttpEvent evt;
         private final ObjectMapper mapper;
 
         @Inject
-        UF(DBCollection coll, Event evt, ObjectMapper mapper) {
+        UF(DBCollection coll, HttpEvent evt, ObjectMapper mapper) {
             this.evt = evt;
             cursor = coll.find();
             evt.getChannel().closeFuture().addListener(new ChannelFutureListener() {

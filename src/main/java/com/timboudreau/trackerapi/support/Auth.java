@@ -2,7 +2,7 @@ package com.timboudreau.trackerapi.support;
 
 import com.google.inject.Inject;
 import com.mastfrog.acteur.Acteur;
-import com.mastfrog.acteur.Event;
+import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.util.BasicCredentials;
 import com.mastfrog.acteur.util.Headers;
 import com.mastfrog.acteur.util.PasswordHasher;
@@ -29,7 +29,7 @@ public final class Auth extends Acteur {
     private final Realm realm;
 
     @Inject
-    Auth(Event evt, DB db, PasswordHasher crypto, Settings settings, Realm realm) {
+    Auth(HttpEvent evt, DB db, PasswordHasher crypto, Settings settings, Realm realm) {
         this.realm = realm;
         String userCollectionName = settings.getString("users.collection.name", "ttusers");
         BasicCredentials c = evt.getHeader(Headers.AUTHORIZATION);

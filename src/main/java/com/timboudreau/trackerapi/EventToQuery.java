@@ -3,7 +3,7 @@ package com.timboudreau.trackerapi;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.util.Providers;
-import com.mastfrog.acteur.Event;
+import com.mastfrog.acteur.HttpEvent;
 import com.mongodb.BasicDBObject;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,20 +19,20 @@ import static com.timboudreau.trackerapi.Properties.*;
  */
 final class EventToQuery implements Provider<BasicDBObject> {
 
-    private final Provider<Event> provider;
+    private final Provider<HttpEvent> provider;
 
     @Inject
-    public EventToQuery(Provider<Event> provider) {
+    public EventToQuery(Provider<HttpEvent> provider) {
         this.provider = provider;
     }
 
-    public EventToQuery(Event evt) {
+    public EventToQuery(HttpEvent evt) {
         this(Providers.of(evt));
     }
 
     @Override
     public BasicDBObject get() {
-        Event evt = provider.get();
+        HttpEvent evt = provider.get();
         BasicDBObject obj = new BasicDBObject();
         String[] params = new String[]{added, duration, end, start};
 
@@ -86,7 +86,7 @@ final class EventToQuery implements Provider<BasicDBObject> {
         return obj;
     }
 
-    protected BasicDBObject onQueryConstructed(Event evt, BasicDBObject obj) {
+    protected BasicDBObject onQueryConstructed(HttpEvent evt, BasicDBObject obj) {
         if (!obj.isEmpty()) {
             obj.put(Properties.type.toString(), Properties.time.toString());
             String idparam = evt.getParameter(_id);
@@ -113,7 +113,7 @@ final class EventToQuery implements Provider<BasicDBObject> {
             this.pattern = Pattern.compile(pattern);
         }
 
-        boolean process(BasicDBObject ob, String name, Event evt) {
+        boolean process(BasicDBObject ob, String name, HttpEvent evt) {
             String val = evt.getParameter(name);
             if (val != null) {
                 return decorate(ob, name, val);

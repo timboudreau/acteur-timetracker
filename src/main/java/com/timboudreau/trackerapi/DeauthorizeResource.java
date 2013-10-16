@@ -3,7 +3,7 @@ package com.timboudreau.trackerapi;
 import com.google.inject.Inject;
 import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.ActeurFactory;
-import com.mastfrog.acteur.Event;
+import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.Page;
 import com.mastfrog.acteur.util.Method;
 import com.mongodb.BasicDBObject;
@@ -42,7 +42,7 @@ public class DeauthorizeResource extends Page {
     private static final class Authorizer extends Acteur {
 
         @Inject
-        Authorizer(TTUser user, Event evt, DBCollection coll) {
+        Authorizer(TTUser user, HttpEvent evt, DBCollection coll) {
             String otherUserNameOrID = evt.getPath().getElement(3).toString();
             BasicDBObject findOtherUserQuery = new BasicDBObject("name", otherUserNameOrID);
             DBObject otherUser = coll.findOne(findOtherUserQuery);
