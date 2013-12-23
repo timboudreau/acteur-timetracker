@@ -7,7 +7,7 @@ import com.mastfrog.acteur.Acteur.RespondWith;
 import com.mastfrog.acteur.ActeurFactory;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.Page;
-import com.mastfrog.acteur.util.Method;
+import com.mastfrog.acteur.headers.Method;
 import com.mongodb.DB;
 import static com.timboudreau.trackerapi.Properties.type;
 import com.timboudreau.trackerapi.support.Auth;

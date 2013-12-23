@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.util.BasicCredentials;
-import com.mastfrog.acteur.util.Headers;
+import com.mastfrog.acteur.headers.Headers;
 import com.mastfrog.acteur.util.PasswordHasher;
 import com.mastfrog.acteur.util.Realm;
 import com.mastfrog.settings.Settings;
