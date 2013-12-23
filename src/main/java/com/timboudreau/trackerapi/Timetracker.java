@@ -20,6 +20,7 @@ import com.mastfrog.acteur.util.CacheControlTypes;
 import com.mastfrog.acteur.util.Headers;
 import com.mastfrog.acteur.util.Method;
 import com.mastfrog.acteur.util.Server;
+import com.mastfrog.jackson.JacksonModule;
 import com.mastfrog.settings.Settings;
 import com.mastfrog.settings.SettingsBuilder;
 import com.mongodb.DB;
@@ -32,15 +33,15 @@ import org.joda.time.Interval;
 
 /**
  * The Timetracker main class
- * 
+ *
  * @author Tim Boudreau
  */
 // Classes which are injected:
 @ImplicitBindings({TTUser.class, DBCollection.class, CreateCollectionPolicy.class,
     DBCursor.class, Interval.class, Body.class, AdjustTimeResource.AdjustParameters.class})
 // Some default values for things
-@Defaults(namespace =
-        @Namespace(Timetracker.TIMETRACKER),
+@Defaults(namespace
+        = @Namespace(Timetracker.TIMETRACKER),
         value = {"periodicLiveWrites=true", "port=7739"})
 @Namespace(Timetracker.TIMETRACKER)
 public class Timetracker extends Application {
@@ -49,7 +50,7 @@ public class Timetracker extends Application {
     public static final String URL_PATTERN_TIME = "^users/(.*?)/time/(.*?)$";
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        // Set up our defaults - can be overridden in 
+        // Set up our defaults - can be overridden in
         // /etc/timetracker.json, ~/timetracker.json and ./timetracker.json
         Settings settings = SettingsBuilder.forNamespace(TIMETRACKER)
                 .addDefaultLocations()
@@ -60,8 +61,9 @@ public class Timetracker extends Application {
         Dependencies deps = Dependencies.builder()
                 .add(settings, TIMETRACKER).
                 add(settings, Namespace.DEFAULT).add(
-                new ServerModule<>(Timetracker.class),
-                new MongoModule(settings)).build();
+                        new ServerModule<>(Timetracker.class),
+                        new JacksonModule(),
+                        new MongoModule(settings)).build();
 
         // Insantiate the server, start it and wait for it to exit
         Server server = deps.getInstance(Server.class);
@@ -95,7 +97,7 @@ public class Timetracker extends Application {
     protected HttpResponse decorateResponse(Event<?> event, Page page, Acteur action, HttpResponse response) {
         response.headers().add("Server", getName());
         // Do no-cache cache control headers for everything
-        if (((HttpEvent)event).getMethod() != Method.OPTIONS) {
+        if (((HttpEvent) event).getMethod() != Method.OPTIONS) {
             CacheControl cc = new CacheControl(CacheControlTypes.Private).add(
                     CacheControlTypes.no_cache).add(CacheControlTypes.no_store);
             response.headers().add(Headers.CACHE_CONTROL.name(), Headers.CACHE_CONTROL.toString(cc));
