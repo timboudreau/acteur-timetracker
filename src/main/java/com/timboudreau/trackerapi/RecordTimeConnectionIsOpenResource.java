@@ -91,7 +91,6 @@ final class RecordTimeConnectionIsOpenResource extends Acteur implements Channel
         evt.getChannel().closeFuture().addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
-                System.out.println("Write recorded time");
                 isRunning.set(false);
                 try {
                     c.call();

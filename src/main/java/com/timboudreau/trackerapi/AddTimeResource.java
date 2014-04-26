@@ -53,7 +53,6 @@ final class AddTimeResource extends Acteur {
 
         @Inject
         CheckParameters(HttpEvent evt) {
-            System.out.println("AddTimeResource checkParameters");
             try {
                 DateTime startTime = new DateTime(evt.getLongParameter(start).get());
                 DateTime endTime = new DateTime(evt.getLongParameter(end).get());
