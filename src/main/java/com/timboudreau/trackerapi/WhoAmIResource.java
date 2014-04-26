@@ -3,10 +3,13 @@ package com.timboudreau.trackerapi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.mastfrog.acteur.Acteur;
-import com.mastfrog.acteur.ActeurFactory;
-import com.mastfrog.acteur.Page;
+import com.mastfrog.acteur.annotations.HttpCall;
+import com.mastfrog.acteur.annotations.Precursors;
 import com.mastfrog.acteur.headers.Headers;
-import com.mastfrog.acteur.headers.Method;
+import static com.mastfrog.acteur.headers.Method.GET;
+import com.mastfrog.acteur.preconditions.Description;
+import com.mastfrog.acteur.preconditions.Methods;
+import com.mastfrog.acteur.preconditions.PathRegex;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
@@ -22,36 +25,24 @@ import java.util.Map;
  *
  * @author Tim Boudreau
  */
-public class WhoAmIResource extends Page {
+@HttpCall
+@Description("Authenticate login and fetch user name")
+@Methods(GET)
+@PathRegex("^whoami/?$")
+@Precursors({UserCollectionFinder.class, Auth.class})
+public class WhoAmIResource extends Acteur {
 
     @Inject
-    WhoAmIResource(ActeurFactory af) {
-        add(af.matchPath("^whoami/?$"));
-        add(af.matchMethods(Method.GET));
-        add(Auth.class);
-        add(UserCollectionFinder.class);
-        add(UserInfoActeur.class);
-    }
-
-    @Override
-    protected String getDescription() {
-        return "Authenticate login and fetch user name";
-    }
-
-    private static class UserInfoActeur extends Acteur {
-
-        @Inject
-        UserInfoActeur(TTUser user, DBCollection coll, ObjectMapper mapper) throws IOException {
-            add(Headers.stringHeader("UserID"), user.id.toStringMongod());
-            DBObject ob = coll.findOne(new BasicDBObject("_id", user.id));
-            if (ob == null) {
-                setState(new RespondWith(HttpResponseStatus.GONE, "No record of " + user.name));
-                return;
-            }
-            Map<String, Object> m = new HashMap<>(ob.toMap());
-            m.remove(Properties.pass);
-            m.remove(Properties.origPass);
-            setState(new RespondWith(200, mapper.writeValueAsString(m)));
+    WhoAmIResource(TTUser user, DBCollection coll, ObjectMapper mapper) throws IOException {
+        add(Headers.stringHeader("UserID"), user.id.toStringMongod());
+        DBObject ob = coll.findOne(new BasicDBObject("_id", user.id));
+        if (ob == null) {
+            setState(new RespondWith(HttpResponseStatus.GONE, "No record of " + user.name));
+            return;
         }
+        Map<String, Object> m = new HashMap<>(ob.toMap());
+        m.remove(Properties.pass);
+        m.remove(Properties.origPass);
+        setState(new RespondWith(200, mapper.writeValueAsString(m)));
     }
 }

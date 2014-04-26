@@ -18,4 +18,16 @@ public enum CreateCollectionPolicy {
             }
         };
     }
+
+    public static class CreatePolicy extends Acteur {
+        CreatePolicy() {
+            setState(new Acteur.ConsumedLockedState(CREATE));
+        }
+    }
+    
+    public static class DontCreatePolicy extends Acteur {
+        DontCreatePolicy() {
+            setState(new ConsumedLockedState(DONT_CREATE));
+        }
+    }
 }

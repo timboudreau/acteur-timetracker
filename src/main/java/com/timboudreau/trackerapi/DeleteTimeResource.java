@@ -2,10 +2,14 @@ package com.timboudreau.trackerapi;
 
 import com.google.inject.Inject;
 import com.mastfrog.acteur.Acteur;
-import com.mastfrog.acteur.ActeurFactory;
 import com.mastfrog.acteur.HttpEvent;
-import com.mastfrog.acteur.Page;
-import com.mastfrog.acteur.headers.Method;
+import com.mastfrog.acteur.annotations.HttpCall;
+import com.mastfrog.acteur.annotations.Precursors;
+import static com.mastfrog.acteur.headers.Method.DELETE;
+import com.mastfrog.acteur.preconditions.BannedUrlParameters;
+import com.mastfrog.acteur.preconditions.Description;
+import com.mastfrog.acteur.preconditions.Methods;
+import com.mastfrog.acteur.preconditions.PathRegex;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.WriteConcern;
@@ -21,34 +25,20 @@ import com.timboudreau.trackerapi.support.AuthorizedChecker;
  *
  * @author Tim Boudreau
  */
-class DeleteTimeResource extends Page {
+@HttpCall
+@PathRegex(Timetracker.URL_PATTERN_TIME)
+@Methods(DELETE)
+@BannedUrlParameters("type")
+@Precursors({Auth.class, AuthorizedChecker.class, CreateCollectionPolicy.DontCreatePolicy.class, TimeCollectionFinder.class})
+@Description("Delete records matching this query")
+class DeleteTimeResource extends Acteur {
 
     @Inject
-    public DeleteTimeResource(ActeurFactory af) {
-        add(af.matchPath(Timetracker.URL_PATTERN_TIME));
-        add(af.matchMethods(Method.DELETE));
-        add(af.banParameters("type"));
-        add(Auth.class);
-        add(AuthorizedChecker.class);
-        add(CreateCollectionPolicy.DONT_CREATE.toActeur());
-        add(TimeCollectionFinder.class);
-        add(TotalGetter.class);
-    }
+    public DeleteTimeResource(HttpEvent evt, DBCollection collection, BasicDBObject query) throws IOException {
+        query.put(type, time);
+        query.remove(detail);
 
-    @Override
-    protected String getDescription() {
-        return "Delete records matching this query";
-    }
-
-    private static class TotalGetter extends Acteur {
-
-        @Inject
-        public TotalGetter(HttpEvent evt, DBCollection collection, BasicDBObject query) throws IOException {
-            query.put(type, time);
-            query.remove(detail);
-
-            WriteResult res = collection.remove(query, WriteConcern.ACKNOWLEDGED);
-            setState(new RespondWith(200, Timetracker.quickJson("updated", res.getN())));
-        }
+        WriteResult res = collection.remove(query, WriteConcern.ACKNOWLEDGED);
+        setState(new RespondWith(200, Timetracker.quickJson("updated", res.getN())));
     }
 }

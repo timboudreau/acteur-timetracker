@@ -10,15 +10,18 @@ import com.mastfrog.guicy.annotations.Namespace;
 import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.Application;
 import com.mastfrog.acteur.Event;
+import com.mastfrog.acteur.Help;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.ImplicitBindings;
 import com.mastfrog.acteur.Page;
+import com.mastfrog.acteur.annotations.GenericApplication;
 import com.mastfrog.acteur.server.PathFactory;
 import com.mastfrog.acteur.server.ServerModule;
 import com.mastfrog.acteur.util.CacheControl;
 import com.mastfrog.acteur.util.CacheControlTypes;
 import com.mastfrog.acteur.headers.Headers;
 import com.mastfrog.acteur.headers.Method;
+import com.mastfrog.acteur.util.RequestID;
 import com.mastfrog.acteur.util.Server;
 import com.mastfrog.jackson.JacksonModule;
 import com.mastfrog.settings.Settings;
@@ -44,7 +47,8 @@ import org.joda.time.Interval;
         = @Namespace(Timetracker.TIMETRACKER),
         value = {"periodicLiveWrites=true", "port=7739"})
 @Namespace(Timetracker.TIMETRACKER)
-public class Timetracker extends Application {
+@Help("Time Tracker")
+public class Timetracker extends GenericApplication {
 
     public static final String TIMETRACKER = "timetracker";
     public static final String URL_PATTERN_TIME = "^users/(.*?)/time/(.*?)$";
@@ -73,24 +77,15 @@ public class Timetracker extends Application {
     @Inject
     Timetracker(DB db) {
         // These are our request handlers:
-        super(SignUpResource.class,
-                SetsResource.class,
-                CORSResource.class,
-                AddTimeResource.class,
-                GetTimeResource.class,
-                DeleteTimeResource.class,
-                TotalTimeResource.class,
-                ModifyEventsResource.class,
-                AdjustTimeResource.class,
-                WhoAmIResource.class,
-                SkewResource.class,
-                SetPasswordResource.class,
-                AuthorizeResource.class,
-                DeauthorizeResource.class,
-                ListUsersResource.class,
-                RecordTimeConnectionIsOpenResource.class,
-                Application.helpPageType());
+        super(AdjustTimeResource.class);
         db.getCollection("users");
+    }
+
+    @Override
+    protected void onBeforeEvent(RequestID id, Event<?> event) {
+        HttpEvent evt = (HttpEvent) event;
+        System.out.println("EVENT: " + evt.getPath());
+        super.onBeforeEvent(id, event);
     }
 
     @Override

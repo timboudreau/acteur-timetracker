@@ -24,6 +24,11 @@
             <type>jar</type>
         </dependency>
         <dependency>
+            <groupId>com.mastfrog</groupId>
+            <artifactId>acteur-mongo</artifactId>
+            <type>jar</type>
+        </dependency>        
+        <dependency>
             <type>jar</type>
             <groupId>com.mastfrog</groupId>
             <artifactId>jackson</artifactId>

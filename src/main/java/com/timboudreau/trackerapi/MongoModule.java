@@ -14,6 +14,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.mastfrog.acteur.Application;
 import com.mastfrog.acteur.util.Realm;
+import com.mastfrog.acteur.util.RotatingRealmProvider;
 import com.mastfrog.jackson.JacksonConfigurer;
 import com.mastfrog.settings.Settings;
 import com.mastfrog.util.Exceptions;
@@ -39,37 +40,23 @@ final class MongoModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        String userCollectionName = settings.getString("user.collection.name", "ttusers");
         bind(BasicDBObject.class).toProvider(EventToQuery.class);
-        try {
-            MongoClient mc = new MongoClient(settings.getString("mongoHost", "localhost"),
-                    settings.getInt("mongoPort", 27017));
-            bind(MongoClient.class).toInstance(mc);
-            DB db = mc.getDB("timetracker");
-            bind(DB.class).toInstance(db);
-        } catch (UnknownHostException ex) {
-            Exceptions.chuck(ex);
-        }
-        bind(Realm.class).toProvider(RealmProvider.class);
+        install(new com.mastfrog.acteur.mongo.MongoModule("timetracker").bindCollection(userCollectionName));
+//        try {
+//            MongoClient mc = new MongoClient(settings.getString("mongoHost", "localhost"),
+//                    settings.getInt("mongoPort", 27017));
+//            bind(MongoClient.class).toInstance(mc);
+//            DB db = mc.getDB("timetracker");
+//            bind(DB.class).toInstance(db);
+//        } catch (UnknownHostException ex) {
+//            Exceptions.chuck(ex);
+//        }
+        bind(Realm.class).toProvider(RotatingRealmProvider.class);
     }
+//
 
-    @Singleton
-    static class RealmProvider implements Provider<Realm> {
-        private static final Realm DEFAULT = Realm.createSimple("Timetracker");
-        private final Provider<Application> app;
-        @Inject
-        RealmProvider(Provider<Application> app) {
-            this.app = app;
-        }
-
-        @Override
-        public Realm get() {
-            // PENDING:  Let a resource inject a realm
-            return DEFAULT;
-        }
-
-    }
-
-    @ServiceProvider(service=JacksonConfigurer.class)
+    @ServiceProvider(service = JacksonConfigurer.class)
     public static final class JacksonC implements JacksonConfigurer {
 
         @Override

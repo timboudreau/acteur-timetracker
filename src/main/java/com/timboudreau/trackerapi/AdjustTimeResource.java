@@ -5,12 +5,20 @@ import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.ActeurFactory;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.Page;
-import com.mastfrog.acteur.headers.Method;
+import static com.mastfrog.acteur.headers.Method.POST;
+import static com.mastfrog.acteur.headers.Method.PUT;
+import com.mastfrog.acteur.preconditions.BannedUrlParameters;
+import com.mastfrog.acteur.preconditions.Description;
+import com.mastfrog.acteur.preconditions.Methods;
+import com.mastfrog.acteur.preconditions.ParametersMustBeNumbersIfPresent;
+import com.mastfrog.acteur.preconditions.PathRegex;
+import com.mastfrog.acteur.preconditions.RequireAtLeastOneUrlParameterFrom;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.WriteConcern;
 import com.mongodb.WriteResult;
+import static com.timboudreau.trackerapi.AdjustTimeResource.URL_PATTERN_ADJUST;
 import com.timboudreau.trackerapi.support.Auth;
 import com.timboudreau.trackerapi.support.CreateCollectionPolicy;
 import com.timboudreau.trackerapi.support.TimeCollectionFinder;
@@ -23,19 +31,20 @@ import io.netty.handler.codec.http.HttpResponseStatus;
  *
  * @author Tim Boudreau
  */
+@PathRegex(URL_PATTERN_ADJUST)
+@Methods({PUT, POST})
+@BannedUrlParameters("type")
+@RequireAtLeastOneUrlParameterFrom({"shift", "moveTo", "length", "newStart", "newEnd"})
+@ParametersMustBeNumbersIfPresent(value = {"newStart", "newEnd", "shift", "moveTo"}, allowDecimal = false, allowNegative = true)
+@Description("Adjust records by shifting, moving or changing start, end or length")
 class AdjustTimeResource extends Page {
 
     public static final String URL_PATTERN_ADJUST = "^users/(.*?)/adjust/(.*?)$";
 
     @Inject
     public AdjustTimeResource(ActeurFactory af) {
-        add(af.matchPath(URL_PATTERN_ADJUST));
-        add(af.matchMethods(Method.PUT, Method.POST));
-        add(af.banParameters("type"));
-        add(af.requireAtLeastOneParameter("shift", "moveTo", "length", "newStart", "newEnd"));
         add(af.parametersMayNotBeCombined("newStart", "shift", "moveTo"));
         add(af.parametersMayNotBeCombined("newEnd", "shift", "moveTo"));
-        add(af.parametersMustBeNumbersIfTheyArePresent(false, true, "newStart", "newEnd", "shift", "moveTo"));
         add(af.parametersMustBeNumbersIfTheyArePresent(false, false, "length"));
         add(Auth.class);
         add(AuthorizedChecker.class);
@@ -43,11 +52,6 @@ class AdjustTimeResource extends Page {
         add(TimeCollectionFinder.class);
         add(af.injectRequestParametersAs(AdjustParameters.class));
         add(Adjuster.class);
-    }
-
-    @Override
-    protected String getDescription() {
-        return "Adjust records by shifting, moving or changing start, end or length";
     }
 
     private static class Adjuster extends Acteur {
