@@ -10,6 +10,7 @@ import com.mastfrog.acteur.headers.Headers;
 import static com.mastfrog.acteur.headers.Method.POST;
 import static com.mastfrog.acteur.headers.Method.PUT;
 import com.mastfrog.acteur.preconditions.BannedUrlParameters;
+import com.mastfrog.acteur.preconditions.BasicAuth;
 import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.PathRegex;
@@ -18,7 +19,6 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.WriteConcern;
 import com.timboudreau.trackerapi.AddTimeResource.CheckParameters;
-import com.timboudreau.trackerapi.support.Auth;
 import com.timboudreau.trackerapi.support.CreateCollectionPolicy;
 import com.timboudreau.trackerapi.support.TTUser;
 import com.timboudreau.trackerapi.support.TimeCollectionFinder;
@@ -38,11 +38,12 @@ import com.timboudreau.trackerapi.support.AuthorizedChecker;
  * @author Tim Boudreau
  */
 @HttpCall
+@BasicAuth
 @Methods({PUT, POST})
 @PathRegex(Timetracker.URL_PATTERN_TIME)
 @RequiredUrlParameters({"start", "end"})
 @BannedUrlParameters({"added", "type"})
-@Precursors({CheckParameters.class, CreateCollectionPolicy.CreatePolicy.class, Auth.class, AuthorizedChecker.class, TimeCollectionFinder.class})
+@Precursors({CheckParameters.class, CreateCollectionPolicy.CreatePolicy.class, AuthorizedChecker.class, TimeCollectionFinder.class})
 @Description("Add A Time Event")
 final class AddTimeResource extends Acteur {
 
@@ -88,17 +89,10 @@ final class AddTimeResource extends Acteur {
                 .append(by, user.idAsString())
                 .append(version, 0);
 
-        if (toWrite.get(start) instanceof String) {
-            throw new IOException("Bad bad bad: " + toWrite.get(start));
-        }
-
         String err = buildQueryFromURLParameters(evt, toWrite, Properties.start, Properties.end, Properties.duration);
         if (err != null) {
             setState(new RespondWith(400, err));
             return;
-        }
-        if (toWrite.get(start) instanceof String) {
-            throw new IOException("Bad bad bad: " + toWrite.get(start));
         }
         coll.insert(toWrite, WriteConcern.SAFE);
         Map m = toWrite.toMap();

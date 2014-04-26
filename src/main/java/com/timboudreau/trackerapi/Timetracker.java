@@ -1,26 +1,19 @@
 package com.timboudreau.trackerapi;
 
-import com.google.common.net.MediaType;
 import com.google.inject.Inject;
 import com.timboudreau.trackerapi.support.CreateCollectionPolicy;
 import com.timboudreau.trackerapi.support.TTUser;
 import com.mastfrog.giulius.Dependencies;
 import com.mastfrog.guicy.annotations.Defaults;
 import com.mastfrog.guicy.annotations.Namespace;
-import com.mastfrog.acteur.Acteur;
-import com.mastfrog.acteur.Application;
 import com.mastfrog.acteur.Event;
 import com.mastfrog.acteur.Help;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.ImplicitBindings;
-import com.mastfrog.acteur.Page;
 import com.mastfrog.acteur.annotations.GenericApplication;
+import com.mastfrog.acteur.annotations.GenericApplicationModule;
 import com.mastfrog.acteur.server.PathFactory;
 import com.mastfrog.acteur.server.ServerModule;
-import com.mastfrog.acteur.util.CacheControl;
-import com.mastfrog.acteur.util.CacheControlTypes;
-import com.mastfrog.acteur.headers.Headers;
-import com.mastfrog.acteur.headers.Method;
 import com.mastfrog.acteur.util.RequestID;
 import com.mastfrog.acteur.util.Server;
 import com.mastfrog.jackson.JacksonModule;
@@ -30,7 +23,6 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.timboudreau.trackerapi.ModifyEventsResource.Body;
-import io.netty.handler.codec.http.HttpResponse;
 import java.io.IOException;
 import org.joda.time.Interval;
 
@@ -65,9 +57,11 @@ public class Timetracker extends GenericApplication {
         Dependencies deps = Dependencies.builder()
                 .add(settings, TIMETRACKER).
                 add(settings, Namespace.DEFAULT).add(
-                        new ServerModule<>(Timetracker.class),
+//                        new ServerModule<>(Timetracker.class),
                         new JacksonModule(),
-                        new MongoModule(settings)).build();
+                        new GenericApplicationModule(settings, Timetracker.class, new Class[0])
+//                        new TimeTrackerModule(settings)
+                ).build();
 
         // Insantiate the server, start it and wait for it to exit
         Server server = deps.getInstance(Server.class);
@@ -76,8 +70,6 @@ public class Timetracker extends GenericApplication {
 
     @Inject
     Timetracker(DB db) {
-        // These are our request handlers:
-        super(AdjustTimeResource.class);
         db.getCollection("users");
     }
 
@@ -88,24 +80,24 @@ public class Timetracker extends GenericApplication {
         super.onBeforeEvent(id, event);
     }
 
-    @Override
-    protected HttpResponse decorateResponse(Event<?> event, Page page, Acteur action, HttpResponse response) {
-        response.headers().add("Server", getName());
-        // Do no-cache cache control headers for everything
-        if (((HttpEvent) event).getMethod() != Method.OPTIONS) {
-            CacheControl cc = new CacheControl(CacheControlTypes.Private).add(
-                    CacheControlTypes.no_cache).add(CacheControlTypes.no_store);
-            response.headers().add(Headers.CACHE_CONTROL.name(), Headers.CACHE_CONTROL.toString(cc));
-        }
-        // We do JSON for everything, so save setting the content type on every page
-        int code = response.getStatus().code();
-        if (code >= 200 && code < 300) {
-            if (response.headers().get(Headers.CONTENT_TYPE.name()) == null) {
-                Headers.write(Headers.CONTENT_TYPE, MediaType.JSON_UTF_8, response);
-            }
-        }
-        return super.decorateResponse(event, page, action, response);
-    }
+//    @Override
+//    protected HttpResponse decorateResponse(Event<?> event, Page page, Acteur action, HttpResponse response) {
+//        response.headers().add("Server", getName());
+//        // Do no-cache cache control headers for everything
+//        if (((HttpEvent) event).getMethod() != Method.OPTIONS) {
+//            CacheControl cc = new CacheControl(CacheControlTypes.Private).add(
+//                    CacheControlTypes.no_cache).add(CacheControlTypes.no_store);
+//            response.headers().add(Headers.CACHE_CONTROL.name().toString(), Headers.CACHE_CONTROL.toString(cc));
+//        }
+//        // We do JSON for everything, so save setting the content type on every page
+//        int code = response.getStatus().code();
+//        if (code >= 200 && code < 300) {
+//            if (response.headers().get(Headers.CONTENT_TYPE.name()) == null) {
+//                Headers.write(Headers.CONTENT_TYPE, MediaType.JSON_UTF_8, response);
+//            }
+//        }
+//        return super.decorateResponse(event, page, action, response);
+//    }
 
     public static String quickJson(String key, Object value) {
         StringBuilder sb = new StringBuilder("{").append('"').append(key).append('"').append(':');

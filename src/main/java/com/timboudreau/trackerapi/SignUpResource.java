@@ -53,7 +53,6 @@ class SignUpResource extends Acteur {
     SignUpResource(@Named("ttusers") DBCollection coll, HttpEvent evt, PasswordHasher crypto, ObjectMapper mapper) throws UnsupportedEncodingException, IOException {
         this.mapper = mapper;
         this.evt = evt;
-        System.out.println("SIGNUP ");
         add(Headers.CONTENT_TYPE, MediaType.JSON_UTF_8);
 
         String userName = URLDecoder.decode(evt.getPath().getElement(1).toString(),
@@ -64,57 +63,44 @@ class SignUpResource extends Acteur {
                 .append(created, DateTime.now().getMillis())
                 .append(version, 0).append("authorizes", new ObjectId[0]);
 
-        System.out.println("A");
         if (!(evt.getRequest() instanceof FullHttpRequest)) {
             if (userName.length() > MAX_USERNAME_LENGTH) {
-                System.out.println("B");
                 setState(new RespondWith(HttpResponseStatus.INTERNAL_SERVER_ERROR,
                         "Not a " + FullHttpRequest.class.getName()));
                 return;
             }
-            System.out.println("C");
             setState(new RespondWith(HttpResponseStatus.REQUEST_URI_TOO_LONG,
                     "Max username length " + MAX_USERNAME_LENGTH));
             return;
         }
-        System.out.println("D");
         if (userName.length() < MIN_USERNAME_LENGTH) {
-            System.out.println("E");
             setState(new RespondWith(HttpResponseStatus.REQUEST_URI_TOO_LONG,
                     "Max username length " + MAX_USERNAME_LENGTH));
             return;
         }
-        System.out.println("F");
         DBObject existing = coll.findOne(new BasicDBObject("name", userName));
         if (existing != null) {
-            System.out.println("G");
             setState(new RespondWith(HttpResponseStatus.CONFLICT,
                     "A user named '" + userName + "' already exists"));
             return;
         }
         String password = evt.getContentAsJSON(String.class);
-        System.out.println("PASS " + password);
         if (password.length() > MAX_PASSWORD_LENGTH) {
-            System.out.println("H");
             setState(new RespondWith(HttpResponseStatus.BAD_REQUEST,
                     "Password to long (" + password.length()
                     + ")  max " + MAX_PASSWORD_LENGTH));
             return;
         }
-        System.out.println("I");
         if (password.length() < MIN_PASSWORD_LENGTH) {
-            System.out.println("J");
             setState(new RespondWith(HttpResponseStatus.BAD_REQUEST,
                     "Password to short (" + password.length()
                     + ")  min " + MIN_PASSWORD_LENGTH));
             return;
         }
-        System.out.println("K");
         String encrypted = crypto.encryptPassword(password);
         nue.put(pass, encrypted);
         nue.put(origPass, encrypted);
         coll.save(nue, WriteConcern.FSYNCED);
-        System.out.println("L");
         setState(new RespondWith(HttpResponseStatus.CREATED, nue.toMap()));
     }
 }

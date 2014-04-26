@@ -7,13 +7,13 @@ import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.annotations.Precursors;
 import com.mastfrog.acteur.preconditions.BannedUrlParameters;
+import com.mastfrog.acteur.preconditions.BasicAuth;
 import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.PathRegex;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.timboudreau.trackerapi.support.Auth;
 import com.timboudreau.trackerapi.support.CreateCollectionPolicy;
 import com.timboudreau.trackerapi.support.TimeCollectionFinder;
 import java.io.IOException;
@@ -27,9 +27,10 @@ import com.timboudreau.trackerapi.support.AuthorizedChecker;
  * @author Tim Boudreau
  */
 @HttpCall
+@BasicAuth
 @PathRegex(PAT)
 @BannedUrlParameters("type")
-@Precursors({Auth.class, AuthorizedChecker.class, CreateCollectionPolicy.DontCreatePolicy.class, TimeCollectionFinder.class})
+@Precursors({AuthorizedChecker.class, CreateCollectionPolicy.DontCreatePolicy.class, TimeCollectionFinder.class})
 @Description("Total times for query")
 final class TotalTimeResource extends Acteur {
 

@@ -30,16 +30,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Description("List all users")
 class ListUsersResource extends Acteur {
 
-    final DBCursor cursor;
-    final AtomicBoolean first = new AtomicBoolean(true);
-    private final HttpEvent evt;
-    private final ObjectMapper mapper;
-
     @Inject
-    ListUsersResource(@Named("ttusers") DBCollection coll, HttpEvent evt, ObjectMapper mapper, Closables clos) {
-        this.evt = evt;
-        cursor = coll.find();
-        this.mapper = mapper;
+    ListUsersResource(@Named("ttusers") DBCollection coll, HttpEvent evt, Closables clos) {
+        DBCursor cursor = coll.find();
         setState(new RespondWith(200));
         if (evt.getMethod() == Method.GET) {
             setResponseWriter(new CursorWriter(cursor, clos, evt, Providers.<MapFilter>of(new MF())));

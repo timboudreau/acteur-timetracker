@@ -10,13 +10,13 @@ import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.annotations.Precursors;
 import com.mastfrog.acteur.headers.Headers;
 import static com.mastfrog.acteur.headers.Method.PUT;
+import com.mastfrog.acteur.preconditions.BasicAuth;
 import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.PathRegex;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.WriteConcern;
-import com.timboudreau.trackerapi.support.Auth;
 import com.timboudreau.trackerapi.support.CreateCollectionPolicy;
 import com.timboudreau.trackerapi.support.LiveWriter;
 import com.timboudreau.trackerapi.support.TTUser;
@@ -41,9 +41,10 @@ import java.util.Arrays;
  * @author Tim Boudreau
  */
 @HttpCall
+@BasicAuth
 @PathRegex("^users/(.*?)/sessions/(.*?)")
 @Methods(PUT)
-@Precursors({Auth.class, AuthorizedChecker.class, CreateCollectionPolicy.CreatePolicy.class, TimeCollectionFinder.class})
+@Precursors({AuthorizedChecker.class, CreateCollectionPolicy.CreatePolicy.class, TimeCollectionFinder.class})
 @Description("Record an ongoing time event which lasts as long as the connection to this"
         + " URL is held open")
 final class RecordTimeConnectionIsOpenResource extends Acteur implements ChannelFutureListener {
@@ -66,7 +67,7 @@ final class RecordTimeConnectionIsOpenResource extends Acteur implements Channel
             setState(new RespondWith(400, err));
             return;
         }
-        add(Headers.CONTENT_LENGTH, 380L);
+        add(Headers.CONTENT_LENGTH, 3600000L);
         add(Headers.stringHeader("X-Remote-Start"), created + "");
         add(Headers.DATE, new DateTime(created));
         setChunked(false);
@@ -105,7 +106,6 @@ final class RecordTimeConnectionIsOpenResource extends Acteur implements Channel
     }
 
     static boolean undot(String key, Object val, BasicDBObject ob) {
-        System.out.println("KEY " + key + " val " + val);
         if (key.length() == 0) {
             return false;
         }
@@ -196,7 +196,7 @@ final class RecordTimeConnectionIsOpenResource extends Acteur implements Channel
 
     @Override
     public void operationComplete(ChannelFuture future) throws Exception {
-        future.channel().write(Unpooled.wrappedBuffer(("Started at " + toWrite.get(Properties.start)).getBytes()));
+        future.channel().writeAndFlush(Unpooled.wrappedBuffer(("Started at " + toWrite.get(Properties.start)).getBytes()));
         // don't close!
     }
 }

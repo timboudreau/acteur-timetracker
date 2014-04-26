@@ -1,6 +1,7 @@
 package com.timboudreau.trackerapi.support;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.settings.Settings;
@@ -21,18 +22,16 @@ import org.bson.types.ObjectId;
 public class AuthorizedChecker extends Acteur {
 
     @Inject
-    AuthorizedChecker(HttpEvent evt, TTUser user, DB db, Settings settings) {
+    AuthorizedChecker(@Named("ttusers") DBCollection coll, HttpEvent evt, TTUser user) {
         Path pth = evt.getPath();
         String userNameInURL = pth.getElement(1).toString();
         if (pth.size() >= 2 && "users".equals(pth.getElement(0).toString())) {
             if (!user.name.equals(userNameInURL)) {
                 DBObject query = new BasicDBObject(Properties.name, userNameInURL);
-                DBCollection coll = db.getCollection(settings.getString("users.collection.name", "ttusers"));
                 boolean authorized = false;
                 DBObject otherUser = coll.findOne(query);
                 if (otherUser != null) {
                     List<ObjectId> ids = (List<ObjectId>) otherUser.get(Properties.authorizes);
-                    System.out.println("GOT BAKC " + ids);
                     if (ids != null) {
                         if (ids.contains(user.id)) {
                             authorized = true;

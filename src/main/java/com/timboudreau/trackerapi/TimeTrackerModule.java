@@ -10,19 +10,18 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
-import com.mastfrog.acteur.Application;
+import com.mastfrog.acteur.annotations.GuiceModule;
+import com.mastfrog.acteur.auth.Authenticator;
+import com.mastfrog.acteur.mongo.MongoConfig;
+import com.mastfrog.acteur.mongo.MongoInitializer;
+import com.mastfrog.acteur.mongo.MongoModule;
 import com.mastfrog.acteur.util.Realm;
 import com.mastfrog.acteur.util.RotatingRealmProvider;
 import com.mastfrog.jackson.JacksonConfigurer;
-import com.mastfrog.settings.Settings;
-import com.mastfrog.util.Exceptions;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.MongoClient;
+import com.mongodb.DBCollection;
+import com.timboudreau.trackerapi.support.AuthenticatorImpl;
 import java.io.IOException;
-import java.net.UnknownHostException;
 import org.bson.types.ObjectId;
 import org.openide.util.lookup.ServiceProvider;
 
@@ -30,31 +29,51 @@ import org.openide.util.lookup.ServiceProvider;
  *
  * @author Tim Boudreau
  */
-final class MongoModule extends AbstractModule {
+@GuiceModule
+final class TimeTrackerModule extends AbstractModule implements MongoConfig {
 
-    private final Settings settings;
-
-    MongoModule(Settings settings) {
-        this.settings = settings;
-    }
+    private final MongoModule mongoModule = new MongoModule("timetracker");
 
     @Override
     protected void configure() {
-        String userCollectionName = settings.getString("user.collection.name", "ttusers");
+        String userCollectionName = "ttusers";
+        mongoModule.bindCollection(userCollectionName);
+        mongoModule.addInitializer(MI.class);
+        install(mongoModule);
         bind(BasicDBObject.class).toProvider(EventToQuery.class);
-        install(new com.mastfrog.acteur.mongo.MongoModule("timetracker").bindCollection(userCollectionName));
-//        try {
-//            MongoClient mc = new MongoClient(settings.getString("mongoHost", "localhost"),
-//                    settings.getInt("mongoPort", 27017));
-//            bind(MongoClient.class).toInstance(mc);
-//            DB db = mc.getDB("timetracker");
-//            bind(DB.class).toInstance(db);
-//        } catch (UnknownHostException ex) {
-//            Exceptions.chuck(ex);
-//        }
+        bind(Authenticator.class).to(AuthenticatorImpl.class);
         bind(Realm.class).toProvider(RotatingRealmProvider.class);
     }
-//
+
+    @Override
+    public MongoConfig addInitializer(Class type) {
+        return mongoModule.addInitializer(type);
+    }
+
+    @Override
+    public MongoConfig bindCollection(String bindingName) {
+        return mongoModule.bindCollection(bindingName);
+    }
+
+    @Override
+    public MongoConfig bindCollection(String bindingName, String collectionName) {
+        return mongoModule.bindCollection(bindingName, collectionName);
+    }
+
+    private static class MI extends MongoInitializer {
+
+        @Inject
+        public MI(Registry registry) {
+            super(registry);
+        }
+
+        @Override
+        protected void onCreateCollection(DBCollection collection) {
+            if ("ttusers".equals(collection.getName())) {
+                collection.ensureIndex("name");
+            }
+        }
+    }
 
     @ServiceProvider(service = JacksonConfigurer.class)
     public static final class JacksonC implements JacksonConfigurer {

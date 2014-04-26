@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.Acteur.RespondWith;
-import com.mastfrog.acteur.ActeurFactory;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.annotations.Precursors;
@@ -12,13 +11,13 @@ import com.mastfrog.acteur.headers.Method;
 import static com.mastfrog.acteur.headers.Method.GET;
 import static com.mastfrog.acteur.headers.Method.HEAD;
 import com.mastfrog.acteur.preconditions.BannedUrlParameters;
+import com.mastfrog.acteur.preconditions.BasicAuth;
 import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.PathRegex;
 import com.mongodb.DB;
 import static com.timboudreau.trackerapi.Properties.type;
 import static com.timboudreau.trackerapi.SetsResource.PAT;
-import com.timboudreau.trackerapi.support.Auth;
 import com.timboudreau.trackerapi.support.AuthorizedChecker;
 import com.timboudreau.trackerapi.support.CreateCollectionPolicy;
 import com.timboudreau.trackerapi.support.TTUser;
@@ -32,10 +31,11 @@ import java.util.List;
  * @author Tim Boudreau
  */
 @HttpCall
+@BasicAuth
 @PathRegex(PAT)
 @Methods({GET, HEAD})
 @BannedUrlParameters(type)
-@Precursors({Auth.class, AuthorizedChecker.class, CreateCollectionPolicy.DontCreatePolicy.class})
+@Precursors({AuthorizedChecker.class, CreateCollectionPolicy.DontCreatePolicy.class})
 @Description("List user's sets of data")
 public class SetsResource extends Acteur {
 

@@ -14,7 +14,6 @@ import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.ParametersMustBeNumbersIfPresent;
 import com.mastfrog.acteur.preconditions.Path;
-import com.timboudreau.trackerapi.support.Auth;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +25,6 @@ import java.util.Map;
 @HttpCall
 @Path("skew")
 @Methods(GET)
-@Precursors(Auth.class)
 @ParametersMustBeNumbersIfPresent("time")
 @Description("Determine Clock Skew and Request Round trip Time")
 public class SkewResource extends Acteur {
