@@ -91,7 +91,7 @@ it knows about hard-coded into it - rather it looks up the set of all pages anno
 on the classpath.  This means that this application is also usable as a library within a larger web
 application.
 
-[GetTimeResource](blob/master/acteur-timetracker/src/main/java/com/timboudreau/trackerapi/GetTimeResource.java) 
+[GetTimeResource](src/main/java/com/timboudreau/trackerapi/GetTimeResource.java) 
 provides a good example of how logic is isolated into specific things.  It has several precursors - 
 ``TimeCollectionFinder`` finds a MongoDB collection corresponding to the requested series.  
 ``AuthorizedChecker`` checks that either the user specified in the URL is the user that is logged
