@@ -24,20 +24,14 @@
 
 package com.timboudreau.trackerapi.support;
 
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
-import com.mastfrog.acteur.auth.Authenticator;
-import com.mastfrog.acteur.util.BasicCredentials;
-import com.mastfrog.acteur.util.PasswordHasher;
+import com.mastfrog.acteur.HttpEvent;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.timboudreau.trackerapi.Properties;
-import static com.timboudreau.trackerapi.Properties.name;
-import static com.timboudreau.trackerapi.Properties.pass;
-import static com.timboudreau.trackerapi.Timetracker.USER_COLLECTION;
-import java.io.IOException;
+import com.timboudreau.trackerapi.Timetracker;
 import java.util.List;
 import org.bson.types.ObjectId;
 
@@ -45,33 +39,30 @@ import org.bson.types.ObjectId;
  *
  * @author tim
  */
-public class AuthenticatorImpl implements Authenticator {
+public class UserFromUrl implements Provider<TTUser> {
 
-    private final Provider<DBCollection> coll;
-    private final PasswordHasher crypto;
+    private final Provider<DBCollection> usersCollection;
+    private final Provider<HttpEvent> event;
+    private final int position;
 
-    @Inject
-    AuthenticatorImpl(@Named(USER_COLLECTION) Provider<DBCollection> coll, PasswordHasher crypto) {
-        this.coll = coll;
-        this.crypto = crypto;
+    public UserFromUrl(@Named(Timetracker.USER_COLLECTION) Provider<DBCollection> usersCollection, Provider<HttpEvent> event, int position) {
+        this.usersCollection = usersCollection;
+        this.event = event;
+        this.position = position;
     }
 
     @Override
-    public Object[] authenticate(String realm, BasicCredentials c) throws IOException {
-        DBObject u = coll.get().findOne(new BasicDBObject(name, new String[]{c.username}));
+    public TTUser get() {
+        HttpEvent evt = event.get();
+        DBCollection users = usersCollection.get();
+        String userName = evt.getPath().getElement(position).toString();
+        DBObject u = users.findOne(new BasicDBObject("name", userName));
         if (u == null) {
-            u = coll.get().findOne(new BasicDBObject(name, c.username));
-        }
-        String pw = (String) u.get(pass);
-        if (pw == null) {
             return null;
         }
-        if (!crypto.checkPassword(c.password, pw)) {
-            return null;
-        }
-        List<ObjectId> authorizes = (List<ObjectId>) u.get("authorizes");
+        List<ObjectId> authorizes = (List<ObjectId>) u.get(Properties.authorizes);
         Number ver = (Number) u.get(Properties.version);
         int version = ver == null ? 0 : ver.intValue();
-        return new Object[]{new TTUser(c.username, (ObjectId) u.get("_id"), version, authorizes)};
+        return new TTUser(userName, (ObjectId) u.get("_id"), version, authorizes);
     }
 }

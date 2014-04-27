@@ -8,6 +8,7 @@ import com.mastfrog.acteur.Application;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.annotations.Precursors;
+import com.mastfrog.acteur.errors.Err;
 import com.mastfrog.acteur.headers.Headers;
 import static com.mastfrog.acteur.headers.Method.PUT;
 import com.mastfrog.acteur.preconditions.BasicAuth;
@@ -55,7 +56,6 @@ final class RecordTimeConnectionIsOpenResource extends Acteur implements Channel
 
     @Inject
     RecordTimeConnectionIsOpenResource(@Named("periodicLiveWrites") final boolean pings, final HttpEvent evt, final Provider<DBCollection> coll, TTUser user, Application application, final Provider<LiveWriter> writer) {
-        System.out.println("RecordTimeConnectionIsOpenResource LiveTime init");
         toWrite.append(by, user.idAsString())
                 .append(start, created)
                 .append(end, created)
@@ -64,7 +64,7 @@ final class RecordTimeConnectionIsOpenResource extends Acteur implements Channel
                 .append(version, 0);
         String err = buildQueryFromURLParameters(evt, toWrite);
         if (err != null) {
-            setState(new RespondWith(400, err));
+            setState(new RespondWith(Err.badRequest(err)));
             return;
         }
         add(Headers.CONTENT_LENGTH, 3600000L);

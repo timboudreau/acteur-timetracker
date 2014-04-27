@@ -6,6 +6,7 @@ import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.annotations.Precursors;
+import com.mastfrog.acteur.errors.Err;
 import com.mastfrog.acteur.headers.Headers;
 import static com.mastfrog.acteur.headers.Method.POST;
 import static com.mastfrog.acteur.headers.Method.PUT;
@@ -59,14 +60,14 @@ final class AddTimeResource extends Acteur {
                 DateTime now = DateTime.now();
                 DateTime twentyYearsAgo = now.minus(Duration.standardDays(365 * 20));
                 if (twentyYearsAgo.isAfter(startTime)) {
-                    setState(new RespondWith(HttpResponseStatus.BAD_REQUEST,
-                            "Too long ago - minimum is " + twentyYearsAgo));
+                    setState(new RespondWith(Err.badRequest(
+                            "Too long ago - minimum is " + twentyYearsAgo)));
                     return;
                 }
                 Interval interval = new Interval(startTime, endTime);
                 setState(new ConsumedLockedState(interval));
             } catch (NumberFormatException e) {
-                setState(new RespondWith(400, "Start or end is not a number: '" + evt.getParameter(start) + "' and '" + evt.getParameter(end)));
+                setState(new RespondWith(Err.badRequest("Start or end is not a number: '" + evt.getParameter(start) + "' and '" + evt.getParameter(end))));
             }
         }
     }
@@ -76,8 +77,8 @@ final class AddTimeResource extends Acteur {
         long startVal = interval.getStartMillis();
         long endVal = interval.getEndMillis();
         if (endVal - startVal <= 0) {
-            setState(new RespondWith(400, "Start is equal to or after end '"
-                    + interval.getStart() + "' and '" + interval.getEnd() + "'"));
+            setState(new RespondWith(Err.badRequest("Start is equal to or after end '"
+                    + interval.getStart() + "' and '" + interval.getEnd() + "'")));
             return;
         }
         BasicDBObject toWrite = new BasicDBObject(type, time)
@@ -90,7 +91,7 @@ final class AddTimeResource extends Acteur {
 
         String err = buildQueryFromURLParameters(evt, toWrite, Properties.start, Properties.end, Properties.duration);
         if (err != null) {
-            setState(new RespondWith(400, err));
+            setState(new RespondWith(Err.badRequest(err)));
             return;
         }
         coll.insert(toWrite, WriteConcern.SAFE);

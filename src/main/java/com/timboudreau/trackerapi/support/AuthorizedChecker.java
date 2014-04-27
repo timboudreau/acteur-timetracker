@@ -3,17 +3,8 @@ package com.timboudreau.trackerapi.support;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.mastfrog.acteur.Acteur;
-import com.mastfrog.acteur.HttpEvent;
-import com.mastfrog.settings.Settings;
-import com.mastfrog.url.Path;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
-import com.timboudreau.trackerapi.Properties;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import java.util.List;
-import org.bson.types.ObjectId;
+import com.mastfrog.acteur.errors.Err;
+import static com.timboudreau.trackerapi.Timetracker.URL_USER;
 
 /**
  *
@@ -22,29 +13,13 @@ import org.bson.types.ObjectId;
 public class AuthorizedChecker extends Acteur {
 
     @Inject
-    AuthorizedChecker(@Named("ttusers") DBCollection coll, HttpEvent evt, TTUser user) {
-        Path pth = evt.getPath();
-        String userNameInURL = pth.getElement(1).toString();
-        if (pth.size() >= 2 && "users".equals(pth.getElement(0).toString())) {
-            if (!user.name.equals(userNameInURL)) {
-                DBObject query = new BasicDBObject(Properties.name, userNameInURL);
-                boolean authorized = false;
-                DBObject otherUser = coll.findOne(query);
-                if (otherUser != null) {
-                    List<ObjectId> ids = (List<ObjectId>) otherUser.get(Properties.authorizes);
-                    if (ids != null) {
-                        if (ids.contains(user.id)) {
-                            authorized = true;
-                        }
-                    }
-                }
-                if (!authorized) {
-                    setState(new RespondWith(HttpResponseStatus.FORBIDDEN, user.name
-                            + " not allowed access to data belonging to " + userNameInURL + "\n"));
-                    return;
-                }
-            }
+    AuthorizedChecker(TTUser authUser, @Named(URL_USER) TTUser otherUser) {
+        boolean authorized = otherUser.authorizes(authUser);
+        if (!authorized) {
+            setState(new RespondWith(Err.forbidden(authUser.name
+                    + " not allowed access to data belonging to " + otherUser.name + "\n")));
+        } else {
+            setState(new ConsumedState());
         }
-        setState(new ConsumedState());
     }
 }

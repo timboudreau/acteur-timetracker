@@ -32,10 +32,10 @@ import com.timboudreau.trackerapi.support.AuthorizedChecker;
 @BannedUrlParameters("type")
 @Precursors({AuthorizedChecker.class, CreateCollectionPolicy.DontCreatePolicy.class, TimeCollectionFinder.class})
 @Description("Delete records matching this query")
-class DeleteTimeResource extends Acteur {
+class DeleteTimeEventResource extends Acteur {
 
     @Inject
-    public DeleteTimeResource(HttpEvent evt, DBCollection collection, BasicDBObject query) throws IOException {
+    public DeleteTimeEventResource(HttpEvent evt, DBCollection collection, BasicDBObject query) throws IOException {
         query.put(type, time);
         query.remove(detail);
 

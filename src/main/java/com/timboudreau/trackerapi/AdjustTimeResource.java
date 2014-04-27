@@ -71,14 +71,14 @@ class AdjustTimeResource extends Acteur {
             update.put("$inc", new BasicDBObject(version, 1));
             DBObject ob = collection.findOne(query);
             if (ob == null) {
-                setState(new RespondWith(HttpResponseStatus.GONE, "No matching object"));
+                setState(new RespondWith(Err.gone("No matching object")));
                 return;
             }
             long newStart = params.newStart() == null ? (Long) ob.get(start) : params.newStart();
             long newEnd = params.newEnd() == null ? (Long) ob.get(end) : params.newEnd();
             if (params.moveTo() == null && newEnd < newStart) {
-                setState(new RespondWith(HttpResponseStatus.GONE, "Start " + newStart 
-                        + " will be after end " + newEnd));
+                setState(new RespondWith(Err.gone("Start " + newStart 
+                        + " will be after end " + newEnd)));
                 return;
             }
             if (params.newStart() != null || params.newEnd() != null) {

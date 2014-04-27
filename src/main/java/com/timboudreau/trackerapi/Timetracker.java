@@ -1,6 +1,7 @@
 package com.timboudreau.trackerapi;
 
-import com.google.inject.Inject;
+import com.google.common.net.MediaType;
+import com.mastfrog.acteur.Acteur;
 import com.timboudreau.trackerapi.support.CreateCollectionPolicy;
 import com.timboudreau.trackerapi.support.TTUser;
 import com.mastfrog.giulius.Dependencies;
@@ -10,19 +11,23 @@ import com.mastfrog.acteur.Event;
 import com.mastfrog.acteur.Help;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.ImplicitBindings;
+import com.mastfrog.acteur.Page;
+import com.mastfrog.acteur.Response;
 import com.mastfrog.acteur.annotations.GenericApplication;
 import com.mastfrog.acteur.annotations.GenericApplicationModule;
+import com.mastfrog.acteur.headers.Headers;
+import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.server.PathFactory;
-import com.mastfrog.acteur.server.ServerModule;
-import com.mastfrog.acteur.util.RequestID;
+import com.mastfrog.acteur.util.CacheControl;
 import com.mastfrog.acteur.util.Server;
 import com.mastfrog.jackson.JacksonModule;
 import com.mastfrog.settings.Settings;
 import com.mastfrog.settings.SettingsBuilder;
-import com.mongodb.DB;
+import com.mastfrog.url.Path;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.timboudreau.trackerapi.ModifyEventsResource.Body;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import java.io.IOException;
 import org.joda.time.Interval;
 
@@ -40,10 +45,14 @@ import org.joda.time.Interval;
         value = {"periodicLiveWrites=true", "port=7739"})
 @Namespace(Timetracker.TIMETRACKER)
 @Help("Time Tracker")
+@Description("A web api for recording blocks of time associated with ad-hoc attributes")
 public class Timetracker extends GenericApplication {
 
     public static final String TIMETRACKER = "timetracker";
     public static final String URL_PATTERN_TIME = "^users/(.*?)/time/(.*?)$";
+    public static final String USER_COLLECTION = "ttusers";
+    public static final String URL_USER = "url";
+    public static final String OTHER_USER = "other";
 
     public static void main(String[] args) throws IOException, InterruptedException {
         // Set up our defaults - can be overridden in
@@ -57,10 +66,8 @@ public class Timetracker extends GenericApplication {
         Dependencies deps = Dependencies.builder()
                 .add(settings, TIMETRACKER).
                 add(settings, Namespace.DEFAULT).add(
-//                        new ServerModule<>(Timetracker.class),
                         new JacksonModule(),
                         new GenericApplicationModule(settings, Timetracker.class, new Class[0])
-//                        new TimeTrackerModule(settings)
                 ).build();
 
         // Insantiate the server, start it and wait for it to exit
@@ -68,36 +75,15 @@ public class Timetracker extends GenericApplication {
         server.start(settings.getInt("port", 7739)).await();
     }
 
-    @Inject
-    Timetracker(DB db) {
-        db.getCollection("users");
-    }
-
     @Override
-    protected void onBeforeEvent(RequestID id, Event<?> event) {
-        HttpEvent evt = (HttpEvent) event;
-        System.out.println("EVENT: " + evt.getPath());
-        super.onBeforeEvent(id, event);
+    protected void onBeforeSendResponse(HttpResponseStatus status, Event<?> event, Response response, Acteur acteur, Page lockedPage) {
+        response.add(Headers.SERVER, getName());
+        Path path = ((HttpEvent) event).getPath();
+        if (status.code() >= 200 && status.code() < 300 && !"help".equals(path.toString())) {
+            response.add(Headers.CACHE_CONTROL, CacheControl.PRIVATE_NO_CACHE_NO_STORE);
+            response.add(Headers.CONTENT_TYPE, MediaType.JSON_UTF_8);
+        }
     }
-
-//    @Override
-//    protected HttpResponse decorateResponse(Event<?> event, Page page, Acteur action, HttpResponse response) {
-//        response.headers().add("Server", getName());
-//        // Do no-cache cache control headers for everything
-//        if (((HttpEvent) event).getMethod() != Method.OPTIONS) {
-//            CacheControl cc = new CacheControl(CacheControlTypes.Private).add(
-//                    CacheControlTypes.no_cache).add(CacheControlTypes.no_store);
-//            response.headers().add(Headers.CACHE_CONTROL.name().toString(), Headers.CACHE_CONTROL.toString(cc));
-//        }
-//        // We do JSON for everything, so save setting the content type on every page
-//        int code = response.getStatus().code();
-//        if (code >= 200 && code < 300) {
-//            if (response.headers().get(Headers.CONTENT_TYPE.name()) == null) {
-//                Headers.write(Headers.CONTENT_TYPE, MediaType.JSON_UTF_8, response);
-//            }
-//        }
-//        return super.decorateResponse(event, page, action, response);
-//    }
 
     public static String quickJson(String key, Object value) {
         StringBuilder sb = new StringBuilder("{").append('"').append(key).append('"').append(':');

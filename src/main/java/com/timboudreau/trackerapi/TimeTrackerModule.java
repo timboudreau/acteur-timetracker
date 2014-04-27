@@ -10,6 +10,10 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
+import com.google.inject.Key;
+import com.google.inject.Provider;
+import com.google.inject.name.Names;
+import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.annotations.GuiceModule;
 import com.mastfrog.acteur.auth.Authenticator;
 import com.mastfrog.acteur.mongo.MongoConfig;
@@ -20,7 +24,12 @@ import com.mastfrog.acteur.util.RotatingRealmProvider;
 import com.mastfrog.jackson.JacksonConfigurer;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
+import static com.timboudreau.trackerapi.Timetracker.OTHER_USER;
+import static com.timboudreau.trackerapi.Timetracker.URL_USER;
+import static com.timboudreau.trackerapi.Timetracker.USER_COLLECTION;
 import com.timboudreau.trackerapi.support.AuthenticatorImpl;
+import com.timboudreau.trackerapi.support.TTUser;
+import com.timboudreau.trackerapi.support.UserFromUrl;
 import java.io.IOException;
 import org.bson.types.ObjectId;
 import org.openide.util.lookup.ServiceProvider;
@@ -36,13 +45,20 @@ final class TimeTrackerModule extends AbstractModule implements MongoConfig {
 
     @Override
     protected void configure() {
-        String userCollectionName = "ttusers";
-        mongoModule.bindCollection(userCollectionName);
+        mongoModule.bindCollection(USER_COLLECTION);
         mongoModule.addInitializer(MI.class);
         install(mongoModule);
         bind(BasicDBObject.class).toProvider(EventToQuery.class);
         bind(Authenticator.class).to(AuthenticatorImpl.class);
         bind(Realm.class).toProvider(RotatingRealmProvider.class);
+
+        Provider<DBCollection> userCollectionProvider = binder().getProvider(Key.get(DBCollection.class, Names.named(USER_COLLECTION)));
+
+        bind(TTUser.class).annotatedWith(Names.named(URL_USER))
+                .toProvider(new UserFromUrl(userCollectionProvider, binder().getProvider(HttpEvent.class), 1));
+
+        bind(TTUser.class).annotatedWith(Names.named(OTHER_USER))
+                .toProvider(new UserFromUrl(userCollectionProvider, binder().getProvider(HttpEvent.class), 3));
     }
 
     @Override
@@ -69,7 +85,7 @@ final class TimeTrackerModule extends AbstractModule implements MongoConfig {
 
         @Override
         protected void onCreateCollection(DBCollection collection) {
-            if ("ttusers".equals(collection.getName())) {
+            if (USER_COLLECTION.equals(collection.getName())) {
                 collection.ensureIndex("name");
             }
         }

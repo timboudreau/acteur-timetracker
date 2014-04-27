@@ -24,6 +24,10 @@ public final class TTUser {
                 : Collections.unmodifiableList(new ArrayList<>(authorizes));
     }
 
+    boolean authorizes(TTUser other) {
+        return other.equals(this) || authorizes(other.id);
+    }
+
     boolean authorizes(ObjectId id) {
         return authorizes != null && authorizes.contains(id);
     }
@@ -32,18 +36,20 @@ public final class TTUser {
         return version;
     }
 
-    public StringBuilder toVariableName() {
-        char[] c = name.toCharArray();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < c.length; i++) {
-            if (!Character.isWhitespace(c[i])) {
-                sb.append(c[i]);
-            }
-        }
-        return sb;
+    public String idAsString() {
+        return id.toString();
     }
 
-    public String idAsString() {
-        return id.toStringMongod();
+    public boolean equals(Object o) {
+        return o == this ? true : o instanceof TTUser
+                ? ((TTUser) o).id.equals(id) : false;
+    }
+
+    public int hashCode() {
+        return id.hashCode();
+    }
+
+    public String toString() {
+        return name + " (" + id + ")";
     }
 }

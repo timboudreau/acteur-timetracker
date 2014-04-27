@@ -17,7 +17,7 @@ import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.PathRegex;
 import com.mongodb.DB;
 import static com.timboudreau.trackerapi.Properties.type;
-import static com.timboudreau.trackerapi.SetsResource.PAT;
+import static com.timboudreau.trackerapi.ListUsersTimeEventSetsResource.PAT;
 import com.timboudreau.trackerapi.support.AuthorizedChecker;
 import com.timboudreau.trackerapi.support.CreateCollectionPolicy;
 import com.timboudreau.trackerapi.support.TTUser;
@@ -37,12 +37,12 @@ import java.util.List;
 @BannedUrlParameters(type)
 @Precursors({AuthorizedChecker.class, CreateCollectionPolicy.DontCreatePolicy.class})
 @Description("List user's sets of data")
-public class SetsResource extends Acteur {
+public class ListUsersTimeEventSetsResource extends Acteur {
 
     public static final String PAT = "^users/(.*?)/list$";
 
     @Inject
-    SetsResource(HttpEvent evt, DB db, TTUser user, ObjectMapper mapper) throws IOException {
+    ListUsersTimeEventSetsResource(HttpEvent evt, DB db, TTUser user, ObjectMapper mapper) throws IOException {
         List<String> l = new ArrayList<>();
         String pfix = new StringBuilder(evt.getPath().getElement(1).toString()).append('_').toString();
         for (String coll : db.getCollectionNames()) {

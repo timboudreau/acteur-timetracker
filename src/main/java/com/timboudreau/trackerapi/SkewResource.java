@@ -8,12 +8,12 @@ import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.ActeurFactory;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.annotations.HttpCall;
-import com.mastfrog.acteur.annotations.Precursors;
 import static com.mastfrog.acteur.headers.Method.GET;
 import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.ParametersMustBeNumbersIfPresent;
 import com.mastfrog.acteur.preconditions.Path;
+import static com.timboudreau.trackerapi.Properties.time;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,7 +32,7 @@ public class SkewResource extends Acteur {
     @Inject
     SkewResource(ActeurFactory af, HttpEvent evt, Provider<ObjectMapper> mapper) throws IOException {
         long now = System.currentTimeMillis();
-        Optional<Long> l = evt.getLongParameter("time");
+        Optional<Long> l = evt.getLongParameter(time);
         Map<String, Object> m = new HashMap<>();
         m.put("received", now);
         if (l.isPresent()) {

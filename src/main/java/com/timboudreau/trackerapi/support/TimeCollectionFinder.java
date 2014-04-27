@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.HttpEvent;
+import com.mastfrog.acteur.errors.Err;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -28,7 +29,7 @@ public final class TimeCollectionFinder extends Acteur {
                     coll = new CollectionProvider(db, collectionName, true);
                     break;
                 default:
-                    setState(new RespondWith(404, "No collection " + collectionName));
+                    setState(new RespondWith(Err.gone("No collection " + collectionName)));
                     return;
             }
         } else {

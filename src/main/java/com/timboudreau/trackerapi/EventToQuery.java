@@ -49,11 +49,9 @@ final class EventToQuery implements Provider<BasicDBObject> {
             }
             if (!found) {
                 String v = evt.getParameter(param);
-                System.out.println("GOT PARAMETER " + v);
                 if (v != null) {
                     try {
                         v = URLDecoder.decode(v, "UTF-8");
-                        System.out.println(" CONVERTED TO " + v);
                     } catch (UnsupportedEncodingException ex) {
                         Exceptions.chuck(ex);
                     }
