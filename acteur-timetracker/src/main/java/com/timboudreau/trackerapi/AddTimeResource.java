@@ -35,6 +35,7 @@ import static com.timboudreau.trackerapi.RecordTimeConnectionIsOpenResource.buil
 import com.timboudreau.trackerapi.support.AuthorizedChecker;
 
 /**
+ * Adds a time entry
  *
  * @author Tim Boudreau
  */
@@ -44,27 +45,37 @@ import com.timboudreau.trackerapi.support.AuthorizedChecker;
 @PathRegex(Timetracker.URL_PATTERN_TIME)
 @RequiredUrlParameters({"start", "end"})
 @BannedUrlParameters({"added", "type"})
-@Precursors({CheckParameters.class, CreateCollectionPolicy.CreatePolicy.class, 
+@Precursors({CheckParameters.class, CreateCollectionPolicy.CreatePolicy.class,
     AuthorizedChecker.class, TimeCollectionFinder.class})
 @Description("Add A Time Event")
 final class AddTimeResource extends Acteur {
 
     static final int MAX_PROPERTIES = 10;
 
+    // This runs first
     static class CheckParameters extends Acteur {
 
         @Inject
         CheckParameters(HttpEvent evt) {
             try {
+                // Get the start and end parameters and check them for validity
                 DateTime startTime = new DateTime(evt.getLongParameter(start).get());
                 DateTime endTime = new DateTime(evt.getLongParameter(end).get());
                 DateTime now = DateTime.now();
                 DateTime twentyYearsAgo = now.minus(Duration.standardDays(365 * 20));
+                // We're not building an api for world history here
                 if (twentyYearsAgo.isAfter(startTime)) {
                     setState(new RespondWith(Err.badRequest(
                             "Too long ago - minimum is " + twentyYearsAgo)));
                     return;
                 }
+                if (endTime.isBefore(startTime)) {
+                    setState(new RespondWith(Err.badRequest("Start is equal to or after end '"
+                            + startTime + "' and '" + endTime + "'")));
+                    return;
+                }
+                // Create an Interval which will be injected into the AddTimeResource
+                // constructor
                 Interval interval = new Interval(startTime, endTime);
                 setState(new ConsumedLockedState(interval));
             } catch (NumberFormatException e) {
@@ -75,13 +86,10 @@ final class AddTimeResource extends Acteur {
 
     @Inject
     AddTimeResource(HttpEvent evt, DBCollection coll, TTUser user, Interval interval) throws IOException {
+        // We have validated values
         long startVal = interval.getStartMillis();
         long endVal = interval.getEndMillis();
-        if (endVal - startVal <= 0) {
-            setState(new RespondWith(Err.badRequest("Start is equal to or after end '"
-                    + interval.getStart() + "' and '" + interval.getEnd() + "'")));
-            return;
-        }
+        // The entity we will write to the database
         BasicDBObject toWrite = new BasicDBObject(type, time)
                 .append(start, startVal)
                 .append(end, endVal)
@@ -90,13 +98,17 @@ final class AddTimeResource extends Acteur {
                 .append(by, user.idAsString())
                 .append(version, 0);
 
+        // Add the other URL properties to the BasicDBObject, returning an
+        // error message if something goes wrong
         String err = buildQueryFromURLParameters(evt, toWrite, Properties.start, Properties.end, Properties.duration);
         if (err != null) {
             setState(new RespondWith(Err.badRequest(err)));
             return;
         }
+        // Write it to the database
         coll.insert(toWrite, WriteConcern.SAFE);
-        Map<String,Object> m = toWrite.toMap();
+        // Add a few headers and return a result
+        Map<String, Object> m = toWrite.toMap();
         ObjectId id = (ObjectId) m.get(_id);
         if (id != null) {
             add(Headers.stringHeader("X-Tracker-ID"), id.toString());

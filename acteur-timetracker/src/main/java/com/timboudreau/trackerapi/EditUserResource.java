@@ -34,7 +34,8 @@ import java.net.URLDecoder;
 import org.joda.time.DateTimeUtils;
 
 /**
- *
+ * Change a user's display name
+ * 
  * @author Tim Boudreau
  */
 @HttpCall

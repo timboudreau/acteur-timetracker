@@ -23,6 +23,7 @@ import com.timboudreau.trackerapi.support.TTUser;
 import io.netty.handler.codec.http.HttpResponseStatus;
 
 /**
+ * Authorizes another user to see our data
  *
  * @author Tim Boudreau
  */
@@ -34,14 +35,19 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 @Description("Authorize another user to access my data")
 public class AuthorizeOtherUserResource extends Acteur {
 
+    // The other user is looked up by UserFromURL and injected - see bindings
+    // in TimeTrackerModule
     @Inject
     AuthorizeOtherUserResource(TTUser user, HttpEvent evt, @Named(USER_COLLECTION) DBCollection coll, @Named(Timetracker.OTHER_USER) Provider<TTUser> otherUser) {
         TTUser other = otherUser.get();
+        // Should not happen
         if (other == null) {
             setState(new RespondWith(Err.gone("No such user " + evt.getPath().getLastElement())));
             return;
         }
+        // Create a query
         BasicDBObject query = new BasicDBObject("_id", user.id());
+        // And an update
         BasicDBObject update = new BasicDBObject("$addToSet", new BasicDBObject(Properties.authorizes,
                 other.id()));
         WriteResult res = coll.update(query, update, false, false, WriteConcern.FSYNCED);

@@ -63,14 +63,15 @@ public class Timetracker extends GenericApplication {
         System.out.println("ARGS " + java.util.Arrays.asList(args));
         // Set up our defaults - can be overridden in
         // /etc/timetracker.json, ~/timetracker.json and ./timetracker.json
+        // or with command-line arguments
         Settings settings = SettingsBuilder.forNamespace(TIMETRACKER)
                 .addDefaultLocations()
                 .add(PathFactory.BASE_PATH_SETTINGS_KEY, "time")
-//                .add("neverKeepAlive", "true")
                 .parseCommandLineArguments(args)
                 .build();
 
-        // Set up the Guice injector
+        // Set up the Guice injector with our settings and modules.  Dependencies
+        // will bind our settings as @Named
         Dependencies deps = Dependencies.builder()
                 .add(settings, TIMETRACKER)
                 .add(settings, Namespace.DEFAULT)
@@ -78,8 +79,8 @@ public class Timetracker extends GenericApplication {
                 .add(new GenericApplicationModule(settings, Timetracker.class, new Class[0])
                 ).build();
 
+        // Get the port we're using
         int port = settings.getInt("port", 7739);
-        System.out.println("PORT IS " + port);
         // Insantiate the server, start it and wait for it to exit
         Server server = deps.getInstance(Server.class);
         return server.start(port);
@@ -87,14 +88,22 @@ public class Timetracker extends GenericApplication {
 
     @Override
     protected void onBeforeSendResponse(HttpResponseStatus status, Event<?> event, Response response, Acteur acteur, Page lockedPage) {
+        // Adds cache control and content type headers to everything
         response.add(Headers.SERVER, getName());
         Path path = ((HttpEvent) event).getPath();
+        // Leave it off for html help and error responses
         if (status.code() >= 200 && status.code() < 300 && !"help".equals(path.toString())) {
             response.add(Headers.CACHE_CONTROL, CacheControl.PRIVATE_NO_CACHE_NO_STORE);
             response.add(Headers.CONTENT_TYPE, MediaType.JSON_UTF_8);
         }
     }
 
+    /**
+     * Write a single key and value as json with minimal overhead
+     * @param key The key
+     * @param value The value
+     * @return JSON
+     */
     public static String quickJson(String key, Object value) {
         StringBuilder sb = new StringBuilder("{").append('"').append(key).append('"').append(':');
         if (value instanceof String) {

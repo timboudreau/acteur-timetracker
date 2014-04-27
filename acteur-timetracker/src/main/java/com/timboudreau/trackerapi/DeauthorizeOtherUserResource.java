@@ -23,6 +23,7 @@ import com.timboudreau.trackerapi.support.TTUser;
 import io.netty.handler.codec.http.HttpResponseStatus;
 
 /**
+ * Remove another user's authoization to see our data
  *
  * @author Tim Boudreau
  */

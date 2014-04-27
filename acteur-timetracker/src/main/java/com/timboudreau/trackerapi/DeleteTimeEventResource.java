@@ -22,6 +22,7 @@ import static com.timboudreau.trackerapi.Properties.*;
 import com.timboudreau.trackerapi.support.AuthorizedChecker;
 
 /**
+ * Delete time events in the specified series matching the query
  *
  * @author Tim Boudreau
  */

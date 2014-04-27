@@ -18,8 +18,9 @@ import com.timboudreau.trackerapi.support.CreateCollectionPolicy;
 import com.timboudreau.trackerapi.support.TimeCollectionFinder;
 
 /**
+ * Get all distinct values of some field
  *
- * @author tim
+ * @author Tim Boudreau
  */
 @HttpCall
 @PathRegex("^users/(.*?)/time/(.*?)/distinct$")

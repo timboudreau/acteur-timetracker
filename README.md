@@ -84,6 +84,13 @@ concerned with.  Its precursors list contains other Acteurs which implement othe
 and may provide objects for injection into this one, or abort the request if some validation
 condition fails.
 
+The application itself extends ``GenericApplication``;  this uses an annotation processor to generate
+files in ``META-INF/http`` which list the ``Page`` classes that make up the application (which in our
+case, are themselves generated).  So the application does not need to have the set of HTTP endpoints
+it knows about hard-coded into it - rather it looks up the set of all pages annotated with ``@HttpCall``
+on the classpath.  This means that this application is also usable as a library within a larger web
+application.
+
 
 Java Client API
 ---------------
