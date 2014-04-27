@@ -44,7 +44,8 @@ import com.timboudreau.trackerapi.support.AuthorizedChecker;
 @PathRegex(Timetracker.URL_PATTERN_TIME)
 @RequiredUrlParameters({"start", "end"})
 @BannedUrlParameters({"added", "type"})
-@Precursors({CheckParameters.class, CreateCollectionPolicy.CreatePolicy.class, AuthorizedChecker.class, TimeCollectionFinder.class})
+@Precursors({CheckParameters.class, CreateCollectionPolicy.CreatePolicy.class, 
+    AuthorizedChecker.class, TimeCollectionFinder.class})
 @Description("Add A Time Event")
 final class AddTimeResource extends Acteur {
 
@@ -73,7 +74,7 @@ final class AddTimeResource extends Acteur {
     }
 
     @Inject
-    AddTimeResource(HttpEvent evt, DBCollection coll, ObjectMapper mapper, TTUser user, Interval interval) throws IOException {
+    AddTimeResource(HttpEvent evt, DBCollection coll, TTUser user, Interval interval) throws IOException {
         long startVal = interval.getStartMillis();
         long endVal = interval.getEndMillis();
         if (endVal - startVal <= 0) {
@@ -95,7 +96,7 @@ final class AddTimeResource extends Acteur {
             return;
         }
         coll.insert(toWrite, WriteConcern.SAFE);
-        Map m = toWrite.toMap();
+        Map<String,Object> m = toWrite.toMap();
         ObjectId id = (ObjectId) m.get(_id);
         if (id != null) {
             add(Headers.stringHeader("X-Tracker-ID"), id.toString());
@@ -103,6 +104,6 @@ final class AddTimeResource extends Acteur {
                 add(Headers.stringHeader("X-Local-ID"), evt.getParameter("localId"));
             }
         }
-        setState(new RespondWith(HttpResponseStatus.ACCEPTED, mapper.writeValueAsString(m)));
+        setState(new RespondWith(HttpResponseStatus.ACCEPTED, m));
     }
 }
