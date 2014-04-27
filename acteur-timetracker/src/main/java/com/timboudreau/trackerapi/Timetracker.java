@@ -20,6 +20,7 @@ import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.server.PathFactory;
 import com.mastfrog.acteur.util.CacheControl;
 import com.mastfrog.acteur.util.Server;
+import com.mastfrog.acteur.util.ServerControl;
 import com.mastfrog.jackson.JacksonModule;
 import com.mastfrog.settings.Settings;
 import com.mastfrog.settings.SettingsBuilder;
@@ -55,25 +56,33 @@ public class Timetracker extends GenericApplication {
     public static final String OTHER_USER = "other";
 
     public static void main(String[] args) throws IOException, InterruptedException {
+        start(args).await();
+    }
+    
+    public static ServerControl start(String... args) throws IOException {
+        System.out.println("ARGS " + java.util.Arrays.asList(args));
         // Set up our defaults - can be overridden in
         // /etc/timetracker.json, ~/timetracker.json and ./timetracker.json
         Settings settings = SettingsBuilder.forNamespace(TIMETRACKER)
                 .addDefaultLocations()
                 .add(PathFactory.BASE_PATH_SETTINGS_KEY, "time")
 //                .add("neverKeepAlive", "true")
+                .parseCommandLineArguments(args)
                 .build();
 
         // Set up the Guice injector
         Dependencies deps = Dependencies.builder()
                 .add(settings, TIMETRACKER)
-                .add(settings, Namespace.DEFAULT).add(
-                        new JacksonModule(),
-                        new GenericApplicationModule(settings, Timetracker.class, new Class[0])
+                .add(settings, Namespace.DEFAULT)
+                .add(new JacksonModule())
+                .add(new GenericApplicationModule(settings, Timetracker.class, new Class[0])
                 ).build();
 
+        int port = settings.getInt("port", 7739);
+        System.out.println("PORT IS " + port);
         // Insantiate the server, start it and wait for it to exit
         Server server = deps.getInstance(Server.class);
-        server.start(settings.getInt("port", 7739)).await();
+        return server.start(port);
     }
 
     @Override

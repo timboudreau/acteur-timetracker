@@ -12,7 +12,6 @@ import com.mastfrog.acteur.preconditions.PathRegex;
 import com.mastfrog.acteur.preconditions.RequiredUrlParameters;
 import com.mongodb.BasicDBObject;
 import com.mongodb.CommandResult;
-import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.timboudreau.trackerapi.support.AuthorizedChecker;
 import com.timboudreau.trackerapi.support.CreateCollectionPolicy;
@@ -31,10 +30,10 @@ import com.timboudreau.trackerapi.support.TimeCollectionFinder;
 public class DistinctResource extends Acteur {
 
     @Inject
-    DistinctResource(HttpEvent evt, DB db, DBCollection coll) {
+    DistinctResource(HttpEvent evt, DBCollection coll) {
         String field = evt.getParameter("field");
         BasicDBObject cmd = new BasicDBObject("distinct", coll.getName()).append("key", field);
-        CommandResult res = db.command(cmd);
+        CommandResult res = coll.getDB().command(cmd);
         setState(new RespondWith(200, res.get("values")));
     }
 }
