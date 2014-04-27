@@ -33,6 +33,8 @@ import com.timboudreau.trackerapi.support.TimeCollectionFinder;
 import java.io.IOException;
 
 /**
+ * Adjust one or more existing records, making it possible to do things such
+ * as shift all events between time a and b forward by 5 minutes.
  *
  * @author Tim Boudreau
  */
@@ -57,22 +59,29 @@ class AdjustTimeResource extends Acteur {
 
     @Inject
     public AdjustTimeResource(HttpEvent evt, DBCollection collection, BasicDBObject query, AdjustParameters params) throws IOException {
+        // All elements we are interested in have the type time
         query.put(type, time);
+        // If "detail" is included, remove that from the query
         query.remove(detail);
 
+        // Build an update BasicDBObject
         UpdateBuilder update = UpdateBuilder.$().increment(version);
+        update.increment(version);
+        // Now figure out what we're being asked to do
         Long shift = params.shift();
         if (shift != null) {
+            // Increment by shift
             update.increment(start, shift).increment(end, shift);
             WriteResult res = collection.update(query, update.build(), false, true, WriteConcern.ACKNOWLEDGED);
             setState(new RespondWith(res.getN() > 0 ? 200 : 400, Timetracker.quickJson("updated", res.getN())));
         } else {
-            update.increment(version);
+            // Find a single element
             DBObject ob = collection.findOne(query);
             if (ob == null) {
                 setState(new RespondWith(Err.gone("No matching object")));
                 return;
             }
+            // Set up new start and end times
             long newStart = params.newStart() == null ? (Long) ob.get(start) : params.newStart();
             long newEnd = params.newEnd() == null ? (Long) ob.get(end) : params.newEnd();
             if (params.moveTo() == null && newEnd < newStart) {

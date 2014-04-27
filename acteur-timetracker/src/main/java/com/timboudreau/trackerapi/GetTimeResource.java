@@ -37,7 +37,7 @@ import com.timboudreau.trackerapi.support.AuthorizedChecker;
 class GetTimeResource extends Acteur {
 
     @Inject
-    public GetTimeResource(DBCollection collection, BasicDBObject query, HttpEvent evt, ObjectMapper mapper, Closables clos) {
+    public GetTimeResource(DBCollection collection, BasicDBObject query, HttpEvent evt, CursorWriter.Factory factory) {
         // Get the list of fieldds, if any, that the caller has restricted the
         // results to - no need to pull anything over from the database we don't
         // actually need
@@ -52,9 +52,8 @@ class GetTimeResource extends Acteur {
                 }
             }
         }
-        // Do the query and get the cursor
+        // Do the query and get the cursor;  add it to the closables to ensure
         DBCursor cur = projection == null ? collection.find(query) : collection.find(query, projection);
-        clos.add(cur);
         if (!cur.hasNext()) {
             ok("[]\n");
         } else {
@@ -63,7 +62,10 @@ class GetTimeResource extends Acteur {
             // Set the response writer to be a CursorWriter, which will write out
             // the results one row at a time
             if (evt.getMethod() != Method.HEAD && evt.getChannel().isOpen()) {
-                setResponseWriter(new CursorWriter(cur, evt, clos));
+                // Create a ResponseWriter which will write and flush one row
+                // at atime
+                CursorWriter writer = factory.create(cur);
+                setResponseWriter(writer);
             }
         }
     }
