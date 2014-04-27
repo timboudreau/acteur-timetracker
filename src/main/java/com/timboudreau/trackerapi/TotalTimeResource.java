@@ -52,7 +52,7 @@ final class TotalTimeResource extends Acteur {
 
         Intervals ivals = new Intervals();
         try (DBCursor cur = collection.find(query)) {
-            for (; cur.hasNext();) {
+            while (cur.hasNext()) {
                 DBObject ob = cur.next();
                 Long startTime = (Long) ob.get(start);
                 Long endTime = (Long) ob.get(end);

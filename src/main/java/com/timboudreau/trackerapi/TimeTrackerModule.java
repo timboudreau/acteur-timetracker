@@ -35,11 +35,12 @@ import org.bson.types.ObjectId;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
+ * Initializes the Time Tracker application
  *
  * @author Tim Boudreau
  */
 @GuiceModule
-final class TimeTrackerModule extends AbstractModule implements MongoConfig {
+public final class TimeTrackerModule extends AbstractModule implements MongoConfig {
 
     private final MongoModule mongoModule = new MongoModule("timetracker");
 

@@ -60,12 +60,13 @@ public class Timetracker extends GenericApplication {
         Settings settings = SettingsBuilder.forNamespace(TIMETRACKER)
                 .addDefaultLocations()
                 .add(PathFactory.BASE_PATH_SETTINGS_KEY, "time")
-                .add("neverKeepAlive", "true").build();
+//                .add("neverKeepAlive", "true")
+                .build();
 
         // Set up the Guice injector
         Dependencies deps = Dependencies.builder()
-                .add(settings, TIMETRACKER).
-                add(settings, Namespace.DEFAULT).add(
+                .add(settings, TIMETRACKER)
+                .add(settings, Namespace.DEFAULT).add(
                         new JacksonModule(),
                         new GenericApplicationModule(settings, Timetracker.class, new Class[0])
                 ).build();

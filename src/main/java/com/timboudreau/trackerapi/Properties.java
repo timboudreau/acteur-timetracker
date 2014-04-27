@@ -23,6 +23,7 @@ public final class Properties {
     public static final String type = "type";
     public static final String time = "time";
     public static final String version = "version";
+    public static final String lastModified = "lastModified";
     //User
     public static final String name = "name";
     public static final String displayName = "displayName";
