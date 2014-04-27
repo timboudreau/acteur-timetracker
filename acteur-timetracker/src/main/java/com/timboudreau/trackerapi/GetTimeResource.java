@@ -54,6 +54,7 @@ class GetTimeResource extends Acteur {
         }
         // Do the query and get the cursor
         DBCursor cur = projection == null ? collection.find(query) : collection.find(query, projection);
+        clos.add(cur);
         if (!cur.hasNext()) {
             ok("[]\n");
         } else {
