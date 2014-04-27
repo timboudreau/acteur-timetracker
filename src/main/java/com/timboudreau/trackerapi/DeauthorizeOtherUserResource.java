@@ -41,8 +41,8 @@ public class DeauthorizeOtherUserResource extends Acteur {
             setState(new RespondWith(Err.gone("No such user " + evt.getPath().getLastElement())));
             return;
         }
-        BasicDBObject query = new BasicDBObject("_id", user.id);
-        BasicDBObject update = new BasicDBObject("$pull", new BasicDBObject(Properties.authorizes, other.id));
+        BasicDBObject query = new BasicDBObject("_id", user.id());
+        BasicDBObject update = new BasicDBObject("$pull", new BasicDBObject(Properties.authorizes, other.id()));
         WriteResult res = coll.update(query, update, false, false, WriteConcern.FSYNCED);
         setState(new RespondWith(HttpResponseStatus.ACCEPTED, Timetracker.quickJson("updated", res.getN())));
     }

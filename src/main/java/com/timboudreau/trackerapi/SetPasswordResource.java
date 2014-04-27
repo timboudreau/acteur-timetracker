@@ -24,6 +24,7 @@ import static com.timboudreau.trackerapi.Properties.name;
 import static com.timboudreau.trackerapi.Properties.pass;
 import static com.timboudreau.trackerapi.Properties.version;
 import static com.timboudreau.trackerapi.Timetracker.USER_COLLECTION;
+import com.timboudreau.trackerapi.mongo.UpdateBuilder;
 import com.timboudreau.trackerapi.support.AuthorizedChecker;
 import com.timboudreau.trackerapi.support.TTUser;
 import java.io.IOException;
@@ -45,15 +46,16 @@ public class SetPasswordResource extends Acteur {
     SetPasswordResource(@Named(USER_COLLECTION) DBCollection coll, HttpEvent evt, PasswordHasher hasher, TTUser user) throws IOException {
         String userName = evt.getPath().getElement(1).toString();
         String pw = evt.getContentAsJSON(String.class);
-        if (!userName.equals(user.name)) {
-            setState(new RespondWith(Err.forbidden(user.name
+        if (!userName.equals(user.name())) {
+            setState(new RespondWith(Err.forbidden(user.name()
                     + " cannot set the password for " + userName)));
             return;
         }
         String hashed = hasher.encryptPassword(pw);
         DBObject query = coll.findOne(new BasicDBObject(name, userName));
-        DBObject update = new BasicDBObject("$set", new BasicDBObject(pass, hashed)).append("$inc",
-                new BasicDBObject(version, 1));
+
+        DBObject update = UpdateBuilder.$().increment("version").set(pass, hashed).build();
+
         WriteResult res = coll.update(query, update, false, false, WriteConcern.FSYNCED);
         setState(new RespondWith(200, Timetracker.quickJson("updated", res.getN())));
     }

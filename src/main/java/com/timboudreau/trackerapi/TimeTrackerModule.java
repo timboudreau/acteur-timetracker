@@ -1,5 +1,6 @@
 package com.timboudreau.trackerapi;
 
+import com.timboudreau.trackerapi.mongo.EventToQuery;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.Version;

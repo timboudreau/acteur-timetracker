@@ -16,8 +16,8 @@ public class AuthorizedChecker extends Acteur {
     AuthorizedChecker(TTUser authUser, @Named(URL_USER) TTUser otherUser) {
         boolean authorized = otherUser.authorizes(authUser);
         if (!authorized) {
-            setState(new RespondWith(Err.forbidden(authUser.name
-                    + " not allowed access to data belonging to " + otherUser.name + "\n")));
+            setState(new RespondWith(Err.forbidden(authUser.name()
+                    + " not allowed access to data belonging to " + otherUser.name() + "\n")));
         } else {
             setState(new ConsumedState());
         }

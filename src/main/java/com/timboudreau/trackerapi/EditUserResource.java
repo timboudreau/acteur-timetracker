@@ -51,8 +51,8 @@ public class EditUserResource extends Acteur {
         String userName = URLDecoder.decode(evt.getPath().getElement(1).toString(), "UTF-8");
         String dn = evt.getParameter(Properties.displayName);
 
-        if (!userName.equals(user.name)) {
-            setState(new RespondWith(Err.forbidden(user.name
+        if (!userName.equals(user.name())) {
+            setState(new RespondWith(Err.forbidden(user.name()
                     + " cannot set the password for " + userName)));
             return;
         }

@@ -1,4 +1,4 @@
-package com.timboudreau.trackerapi;
+package com.timboudreau.trackerapi.mongo;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -6,6 +6,7 @@ import com.google.inject.util.Providers;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.util.Exceptions;
 import com.mongodb.BasicDBObject;
+import com.timboudreau.trackerapi.Properties;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +21,7 @@ import java.net.URLDecoder;
  *
  * @author Tim Boudreau
  */
-final class EventToQuery implements Provider<BasicDBObject> {
+public final class EventToQuery implements Provider<BasicDBObject> {
 
     private final Provider<HttpEvent> provider;
 
