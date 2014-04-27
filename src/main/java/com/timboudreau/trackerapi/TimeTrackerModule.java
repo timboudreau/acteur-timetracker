@@ -93,30 +93,4 @@ public final class TimeTrackerModule extends AbstractModule implements MongoConf
         }
     }
 
-    @ServiceProvider(service = JacksonConfigurer.class)
-    public static final class JacksonC implements JacksonConfigurer {
-
-        @Override
-        public ObjectMapper configure(ObjectMapper om) {
-            om.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
-            SimpleModule sm = new SimpleModule("mongo", new Version(1, 0, 0, null, "com.timboudreau", "trackerapi"));
-            sm.addSerializer(new C());
-            om.registerModule(sm);
-            return om;
-        }
-
-        static class C extends JsonSerializer<ObjectId> {
-
-            @Override
-            public Class<ObjectId> handledType() {
-                return ObjectId.class;
-            }
-
-            @Override
-            public void serialize(ObjectId t, JsonGenerator jg, SerializerProvider sp) throws IOException, JsonProcessingException {
-                String id = t.toStringMongod();
-                jg.writeString(id);
-            }
-        }
-    }
 }

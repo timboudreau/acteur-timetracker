@@ -91,6 +91,11 @@ public class UpdateBuilder {
         inc.put(name, amount);
         return this;
     }
+    
+    public UpdateBuilder increment(String name, long amount) {
+        inc.put(name, amount);
+        return this;
+    }
 
     public UpdateBuilder push(String name, Object val) {
         push.put(name, val);

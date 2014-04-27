@@ -26,6 +26,7 @@ import com.mongodb.WriteResult;
 import com.timboudreau.trackerapi.AdjustTimeResource.AdjustParameters;
 import static com.timboudreau.trackerapi.AdjustTimeResource.URL_PATTERN_ADJUST;
 import static com.timboudreau.trackerapi.Properties.*;
+import com.timboudreau.trackerapi.mongo.UpdateBuilder;
 import com.timboudreau.trackerapi.support.AuthorizedChecker;
 import com.timboudreau.trackerapi.support.CreateCollectionPolicy;
 import com.timboudreau.trackerapi.support.TimeCollectionFinder;
@@ -60,15 +61,14 @@ class AdjustTimeResource extends Acteur {
         query.put(type, time);
         query.remove(detail);
 
-        BasicDBObject update = new BasicDBObject();
-        BasicDBObject set = new BasicDBObject();
+        UpdateBuilder update = UpdateBuilder.$().increment(version);
         Long shift = params.shift();
         if (shift != null) {
-            update.put("$inc", new BasicDBObject(start, shift).append(end, shift).append(version, 1));
-            WriteResult res = collection.update(query, update, false, true, WriteConcern.ACKNOWLEDGED);
+            update.increment(start, shift).increment(end, shift);
+            WriteResult res = collection.update(query, update.build(), false, true, WriteConcern.ACKNOWLEDGED);
             setState(new RespondWith(res.getN() > 0 ? 200 : 400, Timetracker.quickJson("updated", res.getN())));
         } else {
-            update.put("$inc", new BasicDBObject(version, 1));
+            update.increment(version);
             DBObject ob = collection.findOne(query);
             if (ob == null) {
                 setState(new RespondWith(Err.gone("No matching object")));
@@ -77,41 +77,38 @@ class AdjustTimeResource extends Acteur {
             long newStart = params.newStart() == null ? (Long) ob.get(start) : params.newStart();
             long newEnd = params.newEnd() == null ? (Long) ob.get(end) : params.newEnd();
             if (params.moveTo() == null && newEnd < newStart) {
-                setState(new RespondWith(Err.gone("Start " + newStart 
+                setState(new RespondWith(Err.gone("Start " + newStart
                         + " will be after end " + newEnd)));
                 return;
             }
             if (params.newStart() != null || params.newEnd() != null) {
-                update.put("$set", set);
                 if (params.newStart() != null) {
-                    set.put(start, newStart);
+                    update.set(start, newStart);
                 }
                 if (params.newEnd() != null) {
-                    set.put(end, newEnd);
+                    update.set(end, newEnd);
                 }
-                set.put(duration, newEnd - newStart);
+                update.set(duration, newEnd - newStart);
             }
             if (params.length() != null) {
                 if (params.length() < 0) {
                     setState(new RespondWith(Err.badRequest("Negative length")));
                     return;
                 }
-                update.put("$set", set);
                 if (params.newEnd() != null) {
-                    set.put(start, newEnd - params.length());
+                    update.set(start, newEnd - params.length());
                 } else {
-                    set.put(end, newStart + params.length());
+                    update.set(end, newStart + params.length());
                 }
-                set.put(duration, params.length());
+                update.set(duration, params.length());
             }
             if (params.moveTo() != null) {
-                update.put("$set", set);
                 long dur = params.length() == null ? newEnd - newStart : params.length();
-                set.put(start, params.moveTo());
-                set.put(duration, dur);
-                set.put(end, params.moveTo() + dur);
+                update.set(start, params.moveTo());
+                update.set(duration, dur);
+                update.set(end, params.moveTo() + dur);
             }
-            WriteResult res = collection.update(query, update, false, false, WriteConcern.ACKNOWLEDGED);
+            WriteResult res = collection.update(query, update.build(), false, false, WriteConcern.ACKNOWLEDGED);
             setState(new RespondWith(res.getN() > 0 ? 200 : 400, Timetracker.quickJson("updated", res.getN())));
         }
     }

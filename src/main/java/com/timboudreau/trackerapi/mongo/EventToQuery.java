@@ -18,6 +18,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
 /**
+ * Takes the current HTTP request's URL parameters and converts them to a
+ * BasicDBObject which can be used as a mongodb query.  In particular,
+ * uses a syntax where numeric properties can specify greater than, less than,
+ * greater-than-or-equal or less-than-or-equal, e.g. /users/foo/time?start=>=2505050
  *
  * @author Tim Boudreau
  */

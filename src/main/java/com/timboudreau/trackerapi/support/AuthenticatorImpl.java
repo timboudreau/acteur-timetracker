@@ -69,7 +69,7 @@ public class AuthenticatorImpl implements Authenticator {
         if (!crypto.checkPassword(c.password, pw)) {
             return null;
         }
-        List<ObjectId> authorizes = (List<ObjectId>) u.get("authorizes");
+        List<ObjectId> authorizes = (List<ObjectId>) u.get(Properties.authorizes);
         Number ver = (Number) u.get(Properties.version);
         int version = ver == null ? 0 : ver.intValue();
         return new Object[]{new TTUser(c.username, (ObjectId) u.get("_id"), version, authorizes)};
