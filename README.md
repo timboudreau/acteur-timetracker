@@ -22,7 +22,7 @@ Web API
 
 The API is self-documenting - calls are specified by Acteurs with annotations, which are also used to 
 generate live help - just run the application and navigate to ``/help?html=true`` or read [this static copy
-of the help](help.html).
+of the help](http://timboudreau.com/files/help.html).
 
 The API is built around the concept of _time events_, which are records in the database which have a start
 and an end.  These can be generated either by making an HTTP ``PUT`` to ``/users/$USER_NAME/time/$SERIES``
