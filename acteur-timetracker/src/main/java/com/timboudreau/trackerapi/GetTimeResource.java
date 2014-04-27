@@ -38,7 +38,9 @@ class GetTimeResource extends Acteur {
 
     @Inject
     public GetTimeResource(DBCollection collection, BasicDBObject query, HttpEvent evt, ObjectMapper mapper, Closables clos) {
-        query.put(type, time);
+        // Get the list of fieldds, if any, that the caller has restricted the
+        // results to - no need to pull anything over from the database we don't
+        // actually need
         String fields = evt.getParameter(Properties.fields);
         DBObject projection = null;
         if (fields != null) {
@@ -50,11 +52,15 @@ class GetTimeResource extends Acteur {
                 }
             }
         }
+        // Do the query and get the cursor
         DBCursor cur = projection == null ? collection.find(query) : collection.find(query, projection);
         if (!cur.hasNext()) {
             ok("[]\n");
         } else {
+            // Tell the framework we're ready to stream the response
             ok();
+            // Set the response writer to be a CursorWriter, which will write out
+            // the results one row at a time
             if (evt.getMethod() != Method.HEAD && evt.getChannel().isOpen()) {
                 setResponseWriter(new CursorWriter(cur, evt, clos));
             }

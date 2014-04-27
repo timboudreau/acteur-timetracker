@@ -91,6 +91,19 @@ it knows about hard-coded into it - rather it looks up the set of all pages anno
 on the classpath.  This means that this application is also usable as a library within a larger web
 application.
 
+[GetTimeResource](blob/master/acteur-timetracker/src/main/java/com/timboudreau/trackerapi/GetTimeResource.java) 
+provides a good example of how logic is isolated into specific things.  It has several precursors - 
+``TimeCollectionFinder`` finds a MongoDB collection corresponding to the requested series.  
+``AuthorizedChecker`` checks that either the user specified in the URL is the user that is logged
+in (the ``@BasicAuth`` annotation ensures someone is), or that the user is authorized to see the
+data that would be returned.  If all goes well, the query is executed and we pass it to a 
+``CursorWriter``, which will write data out one row at a time - it will write a JSON header, then
+write one document to the socket;  when that is flushed, it will be called back to write the next,
+and so forth.  This approach has beneficial effects for scalability:  Even if a query might return
+a million rows, those rows do not all have to be pulled into memory on the server at once - they
+can be pipelined one at a time.  And while the data is being flushed, the server can use the same
+thread to handle other requests.
+
 
 Java Client API
 ---------------

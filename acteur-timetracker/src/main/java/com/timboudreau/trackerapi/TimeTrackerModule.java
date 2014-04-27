@@ -31,6 +31,8 @@ import static com.timboudreau.trackerapi.Properties.newStart;
 import static com.timboudreau.trackerapi.Properties.shift;
 import static com.timboudreau.trackerapi.Properties.start;
 import static com.timboudreau.trackerapi.Properties.summary;
+import static com.timboudreau.trackerapi.Properties.time;
+import static com.timboudreau.trackerapi.Properties.type;
 import static com.timboudreau.trackerapi.Timetracker.OTHER_USER;
 import static com.timboudreau.trackerapi.Timetracker.URL_USER;
 import static com.timboudreau.trackerapi.Timetracker.USER_COLLECTION;
@@ -82,7 +84,7 @@ public final class TimeTrackerModule extends AbstractModule implements MongoConf
 
         @Override
         public BasicDBObject onQueryConstructed(HttpEvent evt, BasicDBObject obj) {
-            obj.put(Properties.type.toString(), Properties.time.toString());
+            obj.put(type, time);
             String uid = evt.getParameter(by);
             if (uid != null) {
                 obj.put("by", new ObjectId(uid));
