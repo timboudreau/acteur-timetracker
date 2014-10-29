@@ -62,6 +62,9 @@ public class AuthenticatorImpl implements Authenticator {
         if (u == null) {
             u = coll.get().findOne(new BasicDBObject(name, c.username));
         }
+        if (u == null) {
+            return null;
+        }
         String pw = (String) u.get(pass);
         if (pw == null) {
             return null;

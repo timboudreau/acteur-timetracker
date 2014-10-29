@@ -1,6 +1,10 @@
 package com.timboudreau.trackerapi;
 
 import com.google.common.net.MediaType;
+import com.google.inject.Binder;
+import com.google.inject.Inject;
+import com.google.inject.Module;
+import com.google.inject.name.Named;
 import com.mastfrog.acteur.Acteur;
 import com.timboudreau.trackerapi.support.CreateCollectionPolicy;
 import com.timboudreau.trackerapi.support.TTUser;
@@ -16,18 +20,26 @@ import com.mastfrog.acteur.Response;
 import com.mastfrog.acteur.annotations.GenericApplication;
 import com.mastfrog.acteur.annotations.GenericApplicationModule;
 import com.mastfrog.acteur.headers.Headers;
+import com.mastfrog.acteur.mongo.util.UpdateBuilder;
 import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.server.PathFactory;
 import com.mastfrog.acteur.util.CacheControl;
+import com.mastfrog.acteur.util.PasswordHasher;
 import com.mastfrog.acteur.util.Server;
 import com.mastfrog.acteur.util.ServerControl;
 import com.mastfrog.jackson.JacksonModule;
 import com.mastfrog.settings.Settings;
 import com.mastfrog.settings.SettingsBuilder;
 import com.mastfrog.url.Path;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.mongodb.WriteConcern;
+import com.mongodb.WriteResult;
 import com.timboudreau.trackerapi.ModifyEventsResource.Body;
+import static com.timboudreau.trackerapi.Properties.name;
+import static com.timboudreau.trackerapi.Properties.pass;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import java.io.IOException;
 import org.joda.time.Interval;
@@ -58,7 +70,7 @@ public class Timetracker extends GenericApplication {
     public static void main(String[] args) throws IOException, InterruptedException {
         start(args).await();
     }
-    
+
     public static ServerControl start(String... args) throws IOException {
         System.out.println("ARGS " + java.util.Arrays.asList(args));
         // Set up our defaults - can be overridden in
@@ -76,6 +88,7 @@ public class Timetracker extends GenericApplication {
                 .add(settings, TIMETRACKER)
                 .add(settings, Namespace.DEFAULT)
                 .add(new JacksonModule())
+                .add(new ResetPasswordModule())
                 .add(new GenericApplicationModule(settings, Timetracker.class, new Class[0])
                 ).build();
 
@@ -100,6 +113,7 @@ public class Timetracker extends GenericApplication {
 
     /**
      * Write a single key and value as json with minimal overhead
+     *
      * @param key The key
      * @param value The value
      * @return JSON
@@ -115,5 +129,42 @@ public class Timetracker extends GenericApplication {
         }
         sb.append("}\n");
         return sb.toString();
+    }
+
+    static class PasswordResetAndExit {
+        @Inject
+        PasswordResetAndExit(Settings settings, @Named(USER_COLLECTION) DBCollection coll, PasswordHasher hasher) {
+            boolean isReset = settings.getBoolean("reset", false);
+            if (isReset) {
+                String user = settings.getString("user");
+                String password = settings.getString("password");
+                System.out.println("Attempt to reset password for " + user);
+                if (user != null && password != null) {
+                    String hashed = hasher.encryptPassword(password);
+                    DBObject query = coll.findOne(new BasicDBObject(name, user));
+                    if (query != null) {
+                        DBObject update = UpdateBuilder.$().increment("version").set(pass, hashed).build();
+                        WriteResult res = coll.update(query, update, false, false, WriteConcern.FSYNCED);
+                        System.out.println("Updated password for user " + user + " with result " + res);
+                    } else {
+                        System.out.println("Failed to update password for user - no such user " + user);
+                    }
+                } else {
+                    System.out.println("Could not update password - user " + user + " password " + password);
+                }
+                System.exit(0);
+            }
+        }
+    }
+
+    static class ResetPasswordModule implements Module {
+
+        @Override
+        public void configure(Binder binder) {
+            // Allows a user's password to be reset by starting the application
+            // on the command-line with --reset true --user user --password password
+            binder.bind(PasswordResetAndExit.class).asEagerSingleton();
+        }
+
     }
 }

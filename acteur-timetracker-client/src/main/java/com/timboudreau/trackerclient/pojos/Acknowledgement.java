@@ -18,4 +18,9 @@ public class Acknowledgement {
     public int updated() {
         return updated;
     }
+    
+    @Override
+    public String toString() {
+        return updated + " items updated";
+    }
 }

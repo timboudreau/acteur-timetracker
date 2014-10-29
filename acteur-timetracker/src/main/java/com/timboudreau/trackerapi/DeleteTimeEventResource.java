@@ -5,6 +5,7 @@ import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.annotations.Precursors;
+import com.mastfrog.acteur.errors.Err;
 import static com.mastfrog.acteur.headers.Method.DELETE;
 import com.mastfrog.acteur.preconditions.BannedUrlParameters;
 import com.mastfrog.acteur.preconditions.BasicAuth;
@@ -20,6 +21,7 @@ import com.timboudreau.trackerapi.support.TimeCollectionFinder;
 import java.io.IOException;
 import static com.timboudreau.trackerapi.Properties.*;
 import com.timboudreau.trackerapi.support.AuthorizedChecker;
+import org.bson.types.ObjectId;
 
 /**
  * Delete time events in the specified series matching the query
@@ -37,9 +39,21 @@ class DeleteTimeEventResource extends Acteur {
 
     @Inject
     public DeleteTimeEventResource(HttpEvent evt, DBCollection collection, BasicDBObject query) throws IOException {
+        if (query.isEmpty()) {
+            setState(new RespondWith(Err.badRequest("Empty query matches all events in series - will not do that")));
+            return;
+        }
+        String id = evt.getParameter("_id");
+        if (id instanceof String) {
+            try {
+                ObjectId oid = new ObjectId(id.toString());
+                query.put("_id", oid);
+            } catch (IllegalArgumentException e) {
+                setState(new RespondWith(Err.badRequest("Not a valid event id: " + id)));
+            }
+        }
         query.put(type, time);
         query.remove(detail);
-
         WriteResult res = collection.remove(query, WriteConcern.ACKNOWLEDGED);
         setState(new RespondWith(200, Timetracker.quickJson("updated", res.getN())));
     }

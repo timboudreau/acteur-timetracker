@@ -7,6 +7,7 @@ import com.mastfrog.webapi.Callback;
 import com.mastfrog.webapi.builtin.Parameters;
 import com.timboudreau.trackerclient.pojos.Acknowledgement;
 import com.timboudreau.trackerclient.pojos.Event;
+import com.timboudreau.trackerclient.pojos.EventID;
 import com.timboudreau.trackerclient.pojos.FieldID;
 import com.timboudreau.trackerclient.pojos.SeriesID;
 import com.timboudreau.trackerclient.pojos.Totals;
@@ -49,6 +50,16 @@ public class TrackerSession {
 
     public BasicCredentials getCredentials() {
         return new BasicCredentials(userName, password);
+    }
+
+    public <T extends Callback<Acknowledgement>> ResponseFuture removeFields(SeriesID ser, EventID id, Parameters params, T h) throws Exception {
+        //XXX add tests
+        return spi.call(TrackerAPI.DELETE_FIELDS, h, ser, getUserID(), getCredentials(), params);
+    }
+
+    public <T extends Callback<Acknowledgement>> ResponseFuture updateEvent(SeriesID ser, EventID id, Parameters params, T h) throws Exception {
+        //XXX add tests
+        return spi.call(TrackerAPI.MODIFY_FIELDS, h, ser, getUserID(), getCredentials(), params);
     }
 
     public <T extends Callback<Acknowledgement>> ResponseFuture setPassword(String password, T h) throws Exception {

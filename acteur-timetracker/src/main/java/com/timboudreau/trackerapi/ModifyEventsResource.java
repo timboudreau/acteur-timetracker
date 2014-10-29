@@ -39,7 +39,9 @@ import java.util.List;
 @PathRegex(PAT)
 @BannedUrlParameters(type)
 @Precursors({CreateCollectionPolicy.DontCreatePolicy.class, TimeCollectionFinder.class})
-@Description("Modify or add data to an event or set of events")
+@Description("Modify or add data to an event or set of events, or delete fields.  "
+        + "For deletions, the parameters should be simply field_name=1 for "
+        + "eaach feild to be removed")
 public final class ModifyEventsResource extends Acteur {
 
     public static final String PAT = "^users/(.*?)/update/(.*?)/(.*?)$";

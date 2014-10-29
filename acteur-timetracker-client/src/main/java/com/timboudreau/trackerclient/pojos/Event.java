@@ -37,6 +37,9 @@ public final class Event implements ReadableInterval {
     public Map<String, Object> metadata = new LinkedHashMap<>();
     public final String[] tags;
     public final EventID[] ids;
+    public final DateTime start;
+    public final DateTime end;
+    public final boolean running;
 
     @JsonCreator
     public Event(@JsonProperty("start") long start,
@@ -50,12 +53,16 @@ public final class Event implements ReadableInterval {
             @JsonProperty(value = "type", required = false) String type,
             @JsonProperty(value = "metadata", required = false) Map<String, Object> metadata,
             @JsonProperty(value = "tags", required = false) String[] tags,
+            @JsonProperty(value = "running", required = false) Boolean running,
             @JsonProperty(value = "ids", required=false) EventID[] ids) {
         this.interval = new Interval(start, end);
         this.id = id;
         this.ids = ids == null ? id == null ? new EventID[0] : new EventID[]{id} : ids;
+        this.start = new DateTime(start);
+        this.end = new DateTime(end);
         this.created = created;
         this.createdBy = createdBy;
+        this.running = running == null ? false : running;
         this.duration = duration == null ? this.interval.toDuration() : duration;
         this.type = type == null ? "time" : type;
         this.added = added;
@@ -76,7 +83,7 @@ public final class Event implements ReadableInterval {
                 interval.getEndMillis() + dur.getMillis());
         return new Event(nue.getStartMillis(), nue.getEndMillis(), id,
                 created, createdBy, added, version + 1, nue.toDuration(), type,
-                Maps.newHashMap(metadata), tags.clone(), ids);
+                Maps.newHashMap(metadata), tags.clone(), running, ids);
     }
     
     public Object getProperty(String name) {

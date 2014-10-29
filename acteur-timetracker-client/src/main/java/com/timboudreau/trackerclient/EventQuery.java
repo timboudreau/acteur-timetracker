@@ -2,6 +2,7 @@ package com.timboudreau.trackerclient;
 
 import com.mastfrog.netty.http.client.HttpRequestBuilder;
 import com.mastfrog.util.Exceptions;
+import com.timboudreau.trackerclient.pojos.EventID;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashSet;
@@ -26,6 +27,12 @@ public final class EventQuery {
 
     public static EventQuery create() {
         return new EventQuery(false);
+    }
+    
+    public static EventQuery forId(EventID id) {
+        EventQuery eq = new EventQuery(false);
+        eq.terms.add(new Term<>(Properties._id, Relations.EQUAL_TO, id));
+        return eq;
     }
 
     public EventQuery lastslessThanOrEqual(Duration dur) {
@@ -175,6 +182,9 @@ public final class EventQuery {
                     val = ((DateTime) term).getMillis() + "";
                 } else if (term instanceof Duration) {
                     val = ((Duration) term).getMillis() + "";
+                }
+                if (term instanceof EventID) {
+                    return n + '=' + URLEncoder.encode(val, "UTF-8");
                 }
                 return n + '=' + relation + URLEncoder.encode(val, "UTF-8");
             } catch (UnsupportedEncodingException ex) {

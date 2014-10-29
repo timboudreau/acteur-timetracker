@@ -28,6 +28,6 @@ public final class Properties {
     public static final String displayName = "displayName";
     public static final String created = "created";
 
-    private Properties() {
+    public Properties() {
     }
 }

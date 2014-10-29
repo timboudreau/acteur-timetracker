@@ -73,7 +73,6 @@ public class TrackerClientSPI {
 
         @Override
         public void fail(HttpResponseStatus status, ByteBuf bytes) {
-            System.out.println("SESSION CREATOR FAIL " + status);
             callback.fail(status, bytes);
         }
 

@@ -1,7 +1,5 @@
 package com.timboudreau.trackerclient;
 
-import com.google.inject.AbstractModule;
-import com.mastfrog.acteur.annotations.GenericApplicationModule;
 import com.mastfrog.acteur.mongo.MongoHarness;
 import com.mastfrog.acteur.mongo.MongoModule;
 import com.mastfrog.acteur.util.ServerControl;
@@ -9,7 +7,6 @@ import com.mastfrog.giulius.Dependencies;
 import com.mastfrog.giulius.tests.GuiceRunner;
 import com.mastfrog.giulius.tests.TestWith;
 import com.mastfrog.netty.http.client.ResponseFuture;
-import com.mastfrog.settings.Settings;
 import com.mastfrog.util.Streams;
 import com.mastfrog.webapi.Callback;
 import com.mastfrog.webapi.builtin.Parameters;
@@ -339,7 +336,7 @@ public class TrackerAPITest {
         Event e = queryResults[0];
         assertEquals("bar", e.getProperty("foo"));
         assertEquals("quux", e.getProperty("baz"));
-        assertEquals(Boolean.FALSE, e.getProperty("running"));
+        assertFalse(e.running);
         assertTrue(e.duration.getMillis() > WAIT_FOR - 500);
     }
 
