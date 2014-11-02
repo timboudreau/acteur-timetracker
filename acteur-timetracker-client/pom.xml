@@ -25,7 +25,7 @@
     </build>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <mastfrog.version>1.4.16</mastfrog.version>
+        <mastfrog.version>1.4.19</mastfrog.version>
         <trackerapi.version>1.0</trackerapi.version>
     </properties>
 

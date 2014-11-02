@@ -1,13 +1,14 @@
 package com.timboudreau.trackerapi;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.inject.Inject;
 import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.Acteur.RespondWith;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.annotations.Precursors;
+import com.mastfrog.acteur.errors.Err;
 import static com.mastfrog.acteur.headers.Method.DELETE;
-import static com.mastfrog.acteur.headers.Method.POST;
 import static com.mastfrog.acteur.headers.Method.PUT;
 import com.mastfrog.acteur.preconditions.BannedUrlParameters;
 import com.mastfrog.acteur.preconditions.BasicAuth;
@@ -35,7 +36,7 @@ import java.util.List;
  */
 @HttpCall
 @BasicAuth
-@Methods({PUT, POST, DELETE})
+@Methods({PUT, DELETE})
 @PathRegex(PAT)
 @BannedUrlParameters(type)
 @Precursors({CreateCollectionPolicy.DontCreatePolicy.class, TimeCollectionFinder.class})
@@ -53,13 +54,24 @@ public final class ModifyEventsResource extends Acteur {
             Body something = null;
             boolean isDelete = evt.getMethod() == DELETE;
             if (!isDelete) {
-                something = evt.getContentAsJSON(Body.class);
+                try {
+                    something = evt.getContentAsJSON(Body.class);
+                } catch (JsonMappingException e) {
+                    try {
+                        something = new Body(evt.getContentAsJSON(Map.class));
+                    } catch (JsonMappingException e2) {
+                        setState(new RespondWith(Err.badRequest("Bad JSON: " + e.getMessage())));
+                        return;
+                    }
+                }
             } else {
                 something = new Body(1);
             }
+            System.out.println("Loaded body " + something);
             DBObject modification = new BasicDBObject(isDelete ? "$unset"
                     : "$set", new BasicDBObject(evt.getPath().getLastElement().toString(),
                             something.object)).append("$inc", new BasicDBObject("version", 1));
+            
             WriteResult res = collection.update(query, modification, false, true, WriteConcern.ACKNOWLEDGED);
             String resultJson = Timetracker.quickJson("updated", res.getN());
             setState(new RespondWith(res.getN() > 0 ? HttpResponseStatus.ACCEPTED

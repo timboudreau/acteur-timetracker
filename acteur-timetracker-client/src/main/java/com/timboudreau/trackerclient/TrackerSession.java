@@ -15,6 +15,7 @@ import com.timboudreau.trackerclient.pojos.User;
 import com.timboudreau.trackerclient.pojos.UserID;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import java.util.Map;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.Interval;
@@ -52,14 +53,17 @@ public class TrackerSession {
         return new BasicCredentials(userName, password);
     }
 
-    public <T extends Callback<Acknowledgement>> ResponseFuture removeFields(SeriesID ser, EventID id, Parameters params, T h) throws Exception {
-        //XXX add tests
-        return spi.call(TrackerAPI.DELETE_FIELDS, h, ser, getUserID(), getCredentials(), params);
+    public <T extends Callback<String[]>> ResponseFuture distinct(SeriesID ser, String fieldName, T h) throws Exception {
+        return spi.call(TrackerAPI.DISTINCT_FIELDS, h, ser, fieldName, getUserID(), getCredentials());
+    }
+    
+    public <T extends Callback<Acknowledgement>> ResponseFuture removeFields(SeriesID ser, EventID id, T h) throws Exception {
+        return spi.call(TrackerAPI.DELETE_FIELDS, h, ser, id, getUserID(), getCredentials());
     }
 
-    public <T extends Callback<Acknowledgement>> ResponseFuture updateEvent(SeriesID ser, EventID id, Parameters params, T h) throws Exception {
+    public <T extends Callback<Acknowledgement>> ResponseFuture updateEvent(SeriesID ser, EventID id, Map<String,Object> params, T h) throws Exception {
         //XXX add tests
-        return spi.call(TrackerAPI.MODIFY_FIELDS, h, ser, getUserID(), getCredentials(), params);
+        return spi.call(TrackerAPI.MODIFY_FIELDS, h, id, ser, getUserID(), getCredentials(), params);
     }
 
     public <T extends Callback<Acknowledgement>> ResponseFuture setPassword(String password, T h) throws Exception {

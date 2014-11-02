@@ -3,12 +3,14 @@ package com.timboudreau.trackerclient;
 import com.mastfrog.acteur.headers.Method;
 import static com.mastfrog.acteur.headers.Method.DELETE;
 import static com.mastfrog.acteur.headers.Method.GET;
+import static com.mastfrog.acteur.headers.Method.POST;
 import static com.mastfrog.acteur.headers.Method.PUT;
 import com.mastfrog.webapi.Interpreter;
 import com.mastfrog.webapi.WebCall;
 import com.mastfrog.webapi.WebCallBuilder;
 import com.mastfrog.webapi.WebCallEnum;
 import com.mastfrog.webapi.builtin.BodyFromString;
+import com.mastfrog.webapi.builtin.BodyFromMap;
 import com.mastfrog.webapi.builtin.IntervalParameters;
 import com.mastfrog.webapi.builtin.ParameterFromClassNameAndToStringCamelCase;
 import com.timboudreau.trackerclient.pojos.DisplayName;
@@ -20,6 +22,7 @@ import com.timboudreau.trackerclient.pojos.UserID;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import java.util.Map;
 import org.joda.time.Interval;
 
 /**
@@ -29,9 +32,10 @@ import org.joda.time.Interval;
  */
 public enum TrackerAPI implements WebCallEnum {
 
+    DISTINCT_FIELDS(new WebCallBuilder().method(GET).path("users/{{userid}}/time/{{seriesid}}/distinct").authenticationRequired().addRequiredTypes(UserID.class, SeriesID.class).withDecorator(String.class, FieldNameFromString.class)),
     DELETE_TIME(new WebCallBuilder().method(DELETE).path("users/{{userid}}/time/{{seriesid}}").authenticationRequired().addRequiredTypes(UserID.class, SeriesID.class).withDecorator(EventQuery.class, EventQueryDecorator.class)),
-    DELETE_FIELDS(new WebCallBuilder().method(DELETE).path("^users/{{userid}}/update/{{seriesid}}/{{eventid}}$").authenticationRequired().addRequiredTypes(UserID.class, SeriesID.class, EventID.class)),
-    MODIFY_FIELDS(new WebCallBuilder().method(PUT).path("^users/{{userid}}/update/{{seriesid}}/{{eventid}}$").authenticationRequired().addRequiredTypes(UserID.class, SeriesID.class, EventID.class)),
+    DELETE_FIELDS(new WebCallBuilder().method(DELETE).path("users/{{userid}}/update/{{seriesid}}/{{eventid}}").authenticationRequired().addRequiredTypes(UserID.class, SeriesID.class, EventID.class)),
+    MODIFY_FIELDS(new WebCallBuilder().method(POST).withDecorator(Map.class, BodyFromMap.class).path("users/{{userid}}/update/{{seriesid}}/{{eventid}}").authenticationRequired().addRequiredTypes(UserID.class, SeriesID.class, EventID.class)),
     GET_TIMES(new WebCallBuilder().path("users/{{userid}}/time/{{seriesid}}").authenticationRequired().withDecorator(EventQuery.class, EventQueryDecorator.class).addRequiredTypes(UserID.class, SeriesID.class)),
     SIGNUP(new WebCallBuilder().addRequiredTypes(UserID.class, DisplayName.class).withDecorator(DisplayName.class, ParameterFromClassNameAndToStringCamelCase.class).withDecorator(String.class, BodyFromString.class).method(PUT).path("users/{{userid}}/signup")),
     LIST_USERS(GET, "all", false),

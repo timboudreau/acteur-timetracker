@@ -13,6 +13,7 @@ public final class Properties {
     public static final String end = "end";
     public static final String duration = "dur";
     public static final String fields = "fields";
+    public static final String field = "field";
     public static final String detail = "detail";
     public static final String localId = "localid";
     public static final String origPass = "origPass";
@@ -23,6 +24,7 @@ public final class Properties {
     public static final String type = "type";
     public static final String time = "time";
     public static final String version = "version";
+    public static final String activity = "activity";
     //User
     public static final String name = "name";
     public static final String displayName = "displayName";

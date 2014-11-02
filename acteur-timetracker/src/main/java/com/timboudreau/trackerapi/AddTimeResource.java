@@ -41,7 +41,7 @@ import com.timboudreau.trackerapi.support.AuthorizedChecker;
  */
 @HttpCall
 @BasicAuth
-@Methods({PUT, POST})
+@Methods({PUT})
 @PathRegex(Timetracker.URL_PATTERN_TIME)
 @RequiredUrlParameters({"start", "end"})
 @BannedUrlParameters({"added", "type"})
