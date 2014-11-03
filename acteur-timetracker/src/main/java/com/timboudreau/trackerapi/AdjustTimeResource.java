@@ -33,8 +33,8 @@ import com.timboudreau.trackerapi.support.TimeCollectionFinder;
 import java.io.IOException;
 
 /**
- * Adjust one or more existing records, making it possible to do things such
- * as shift all events between time a and b forward by 5 minutes.
+ * Adjust one or more existing records, making it possible to do things such as
+ * shift all events between time a and b forward by 5 minutes.
  *
  * @author Tim Boudreau
  */
@@ -42,13 +42,13 @@ import java.io.IOException;
 @BasicAuth
 @PathRegex(URL_PATTERN_ADJUST)
 @Methods({PUT, POST})
-@BannedUrlParameters("type")
+@BannedUrlParameters({Properties.type, Properties.version})
 @UrlParametersMayNotBeCombinedSets({
-    @UrlParametersMayNotBeCombined({"newStart", "shift", "moveTo"}),
-    @UrlParametersMayNotBeCombined({"newEnd", "shift", "moveTo"})
+    @UrlParametersMayNotBeCombined({Properties.newStart, Properties.shift, Properties.moveTo}),
+    @UrlParametersMayNotBeCombined({Properties.newEnd, Properties.shift, Properties.moveTo})
 })
-@RequireAtLeastOneUrlParameterFrom({"shift", "moveTo", "length", "newStart", "newEnd"})
-@ParametersMustBeNumbersIfPresent(value = {"newStart", "newEnd", "shift", "moveTo", "length"}, allowDecimal = false, allowNegative = true)
+@RequireAtLeastOneUrlParameterFrom({Properties.shift, Properties.moveTo, Properties.length, Properties.newStart, Properties.newEnd})
+@ParametersMustBeNumbersIfPresent(value = {Properties.newStart, Properties.newEnd, Properties.shift, Properties.moveTo, Properties.length}, allowDecimal = false, allowNegative = true)
 @Description("Adjust records by shifting, moving or changing start, end or length")
 @InjectParametersAsInterface(AdjustParameters.class)
 @Precursors({AuthorizedChecker.class, CreateCollectionPolicy.DontCreatePolicy.class,

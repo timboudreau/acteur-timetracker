@@ -3,7 +3,6 @@ package com.timboudreau.trackerapi;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.mastfrog.acteur.Acteur;
-import com.mastfrog.acteur.Acteur.RespondWith;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.annotations.Precursors;

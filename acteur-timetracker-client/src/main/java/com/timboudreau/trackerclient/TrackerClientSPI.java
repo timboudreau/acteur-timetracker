@@ -52,6 +52,10 @@ public class TrackerClientSPI {
         return invoker.call(TrackerAPI.WHO_AM_I, new LogReceiver(TrackerAPI.WHO_AM_I), new SessionCreator(callback, userName, password), new BasicCredentials(userName, password));
     }
 
+    public ResponseFuture checkVersion(Callback<String> cb) throws Exception {
+        return invoker.call(TrackerAPI.GET_API_VERSION, cb);
+    }
+
     class SessionCreator extends Callback<User> {
 
         private final Callback<TrackerSession> callback;

@@ -17,14 +17,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Keeps a collection of callables which update the database periodically
- * for as long as they're alive.
+ * Keeps a collection of callables which update the database periodically for as
+ * long as they're alive.
  *
  * @author Tim Boudreau
  */
 @Singleton
-@Defaults(namespace =
-        @Namespace(Timetracker.TIMETRACKER), value = "liveWriteInterval=120000")
+@Defaults(namespace
+        = @Namespace(Timetracker.TIMETRACKER), value = "liveWriteInterval=120000")
 @Namespace(Timetracker.TIMETRACKER)
 public final class LiveWriter {
 

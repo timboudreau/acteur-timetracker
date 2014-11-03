@@ -11,6 +11,7 @@ import static com.mastfrog.acteur.headers.Method.POST;
 import static com.mastfrog.acteur.headers.Method.PUT;
 import com.mastfrog.acteur.mongo.util.UpdateBuilder;
 import com.mastfrog.acteur.preconditions.BasicAuth;
+import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.MaximumRequestBodyLength;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.MinimumRequestBodyLength;
@@ -39,6 +40,7 @@ import java.io.IOException;
 @MinimumRequestBodyLength(SignUpResource.MIN_PASSWORD_LENGTH)
 @MaximumRequestBodyLength(SignUpResource.MAX_PASSWORD_LENGTH)
 @Precursors({AuthorizedChecker.class})
+@Description("Set a user's password")
 public class SetPasswordResource extends Acteur {
 
     @Inject
@@ -53,7 +55,7 @@ public class SetPasswordResource extends Acteur {
         String hashed = hasher.encryptPassword(pw);
         DBObject query = coll.findOne(new BasicDBObject(name, userName));
 
-        DBObject update = UpdateBuilder.$().increment("version").set(pass, hashed).build();
+        DBObject update = UpdateBuilder.$().increment(Properties.version).set(pass, hashed).build();
 
         WriteResult res = coll.update(query, update, false, false, WriteConcern.FSYNCED);
         setState(new RespondWith(200, Timetracker.quickJson("updated", res.getN())));

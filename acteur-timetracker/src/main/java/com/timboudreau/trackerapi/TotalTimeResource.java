@@ -31,7 +31,7 @@ import com.timboudreau.trackerapi.support.AuthorizedChecker;
 @PathRegex(PAT)
 @BannedUrlParameters("type")
 @Precursors({AuthorizedChecker.class, CreateCollectionPolicy.DontCreatePolicy.class, TimeCollectionFinder.class})
-@Description("Total times for query")
+@Description("Tallys total times for events matching the query terms in the URL parameters")
 final class TotalTimeResource extends Acteur {
 
     public static final String PAT = "^users/(.*?)/total/(.*?)$";
@@ -56,7 +56,7 @@ final class TotalTimeResource extends Acteur {
                 DBObject ob = cur.next();
                 Long startTime = (Long) ob.get(start);
                 Long endTime = (Long) ob.get(end);
-                ivals.add(new Interval(startTime, endTime), "" + ob.get("_id"));
+                ivals.add(new Interval(startTime, endTime), "" + ob.get(Properties._id));
             }
         }
         setState(new RespondWith(200, ivals.toJSON(detail, summary)));

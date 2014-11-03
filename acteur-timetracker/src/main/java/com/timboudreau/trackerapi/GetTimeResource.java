@@ -1,9 +1,7 @@
 package com.timboudreau.trackerapi;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.mastfrog.acteur.Acteur;
-import com.mastfrog.acteur.Closables;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.annotations.Precursors;
@@ -18,10 +16,10 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.timboudreau.trackerapi.support.CreateCollectionPolicy;
-import com.timboudreau.trackerapi.support.TimeCollectionFinder;
 import static com.timboudreau.trackerapi.Properties.*;
 import com.timboudreau.trackerapi.support.AuthorizedChecker;
+import com.timboudreau.trackerapi.support.CreateCollectionPolicy;
+import com.timboudreau.trackerapi.support.TimeCollectionFinder;
 
 /**
  *
@@ -32,7 +30,7 @@ import com.timboudreau.trackerapi.support.AuthorizedChecker;
 @PathRegex(Timetracker.URL_PATTERN_TIME)
 @Methods({Method.GET, Method.HEAD})
 @BannedUrlParameters(type)
-@Description("Query recorded time events")
+@Description("Query recorded time events, specifying the user and sequence ID")
 @Precursors({AuthorizedChecker.class, CreateCollectionPolicy.CreatePolicy.class, TimeCollectionFinder.class})
 class GetTimeResource extends Acteur {
 

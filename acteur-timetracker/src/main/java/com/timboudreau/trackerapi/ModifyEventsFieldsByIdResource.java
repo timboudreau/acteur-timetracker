@@ -38,9 +38,7 @@ import org.bson.types.ObjectId;
 @PathRegex(PAT)
 @BannedUrlParameters({type, version})
 @Precursors({CreateCollectionPolicy.DontCreatePolicy.class, TimeCollectionFinder.class})
-@Description("Modify or add data to an event or set of events, or delete fields.  "
-        + "For deletions, the parameters should be simply field_name=1 for "
-        + "eaach field to be removed")
+@Description("Modify or add data to a single event, including the modified fields in the body")
 public final class ModifyEventsFieldsByIdResource extends Acteur {
 
     public static final String PAT = "^users/(.*?)/update/(.*?)/(.*?)$";
@@ -55,7 +53,7 @@ public final class ModifyEventsFieldsByIdResource extends Acteur {
             setState(new RespondWith(Err.badRequest("Not an ID: " + evt.getPath().getLastElement())));
             return;
         }
-        query.put("_id", oid);
+        query.put(Properties._id, oid);
         BasicDBObject mod;
         try {
             mod = new BasicDBObject(evt.getContentAsJSON(Map.class));
@@ -63,21 +61,22 @@ public final class ModifyEventsFieldsByIdResource extends Acteur {
             setState(new RespondWith(Err.badRequest("Bad JSON: " + e.getMessage())));
             return;
         }
-        System.out.println("BODY IS " + evt.getContentAsJSON(String.class));
-        if (!checkNumber(mod, "dur") || !checkNumber(mod, "start") || !checkNumber(mod, "end")) {
+        // XXX check for start / end / dur and recompute whichever is missing
+        for (String banned : new String[] { Properties._id, Properties.version, Properties.created, Properties.running, "createdBy"}) {
+            mod.removeField(banned);
+        }
+        if (!checkNumber(mod, Properties.duration) || !checkNumber(mod, Properties.start) || !checkNumber(mod, Properties.end)) {
             return;
         }
-        if (mod.containsField("dur") && !(mod.get("dur") instanceof Number)) {
-            if (mod.get("dur") instanceof String) {
-                mod.put("dur", Long.parseLong(mod.get("dur").toString()));
+        if (mod.containsField(Properties.duration) && !(mod.get(Properties.duration) instanceof Number)) {
+            if (mod.get(Properties.duration) instanceof String) {
+                mod.put(Properties.duration, Long.parseLong(mod.get(Properties.duration).toString()));
             } else {
-                setState(new RespondWith(Err.badRequest("Duration must be a string but is " + mod.get("dur"))));
+                setState(new RespondWith(Err.badRequest("Duration must be a number but is " + mod.get(Properties.duration))));
                 return;
             }
         }
-        System.out.println("Loaded body " + mod);
-        System.out.println("QUERY IS " + query);
-        DBObject modification = new BasicDBObject("$set", mod).append("$inc", new BasicDBObject("version", 1));
+        DBObject modification = new BasicDBObject("$set", mod).append("$inc", new BasicDBObject(Properties.version, 1));
         WriteResult res = collection.update(query, modification, false, true, WriteConcern.ACKNOWLEDGED);
         String resultJson = Timetracker.quickJson("updated", res.getN());
         setState(new RespondWith(res.getN() > 0 ? HttpResponseStatus.ACCEPTED

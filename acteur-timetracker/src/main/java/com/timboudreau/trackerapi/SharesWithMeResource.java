@@ -32,14 +32,14 @@ import java.io.IOException;
 @PathRegex("^users/.*?/sharers/?$")
 @Methods(GET)
 @BasicAuth
-@Description("Authenticate login and fetch user name")
+@Description("List other uses whose events I can read or modify")
 @Concluders(CursorWriterActeur.class)
 public class SharesWithMeResource extends Acteur {
 
     @Inject
     SharesWithMeResource(HttpEvent evt, TTUser user, @Named(Timetracker.USER_COLLECTION) DBCollection coll, ObjectMapper mapper) throws IOException {
         add(Headers.stringHeader("UserID"), user.id().toString());
-        BasicDBObject projection = new BasicDBObject("_id", 1).append(name, 1).append(displayName, 1);
+        BasicDBObject projection = new BasicDBObject(Properties._id, 1).append(name, 1).append(displayName, 1);
         DBCursor cursor = coll.find(new BasicDBObject(authorizes, user.id()), projection);
         if (cursor == null) {
             setState(new RespondWith(HttpResponseStatus.GONE, "No record of " + user.name()));

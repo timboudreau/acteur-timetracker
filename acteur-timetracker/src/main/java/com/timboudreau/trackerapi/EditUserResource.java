@@ -11,6 +11,7 @@ import static com.mastfrog.acteur.headers.Method.POST;
 import static com.mastfrog.acteur.headers.Method.PUT;
 import com.mastfrog.acteur.preconditions.BannedUrlParameters;
 import com.mastfrog.acteur.preconditions.BasicAuth;
+import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.PathRegex;
 import com.mastfrog.acteur.preconditions.RequireAtLeastOneUrlParameterFrom;
@@ -35,7 +36,7 @@ import org.joda.time.DateTimeUtils;
 
 /**
  * Change a user's display name
- * 
+ *
  * @author Tim Boudreau
  */
 @HttpCall
@@ -45,6 +46,7 @@ import org.joda.time.DateTimeUtils;
 @BannedUrlParameters({Properties._id, Properties.name, Properties.pass, Properties.origPass, Properties.authorizes})
 @RequireAtLeastOneUrlParameterFrom(displayName)
 @Precursors(AuthorizedChecker.class)
+@Description("Edit a user's properties")
 public class EditUserResource extends Acteur {
 
     @Inject
@@ -73,7 +75,7 @@ public class EditUserResource extends Acteur {
 
         DBObject update = new BasicDBObject("$set", new BasicDBObject(displayName, dn)
                 .append(lastModified, DateTimeUtils.currentTimeMillis())).append("$inc",
-                        new BasicDBObject("version", 1));
+                        new BasicDBObject(Properties.version, 1));
 
         WriteResult res = coll.update(query, update, false, false, WriteConcern.FSYNCED);
 //        if (res.getN() == 1) {

@@ -1,6 +1,5 @@
 package com.timboudreau.trackerapi;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.HttpEvent;
@@ -8,7 +7,6 @@ import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.annotations.Precursors;
 import com.mastfrog.acteur.errors.Err;
 import com.mastfrog.acteur.headers.Headers;
-import static com.mastfrog.acteur.headers.Method.POST;
 import static com.mastfrog.acteur.headers.Method.PUT;
 import com.mastfrog.acteur.preconditions.BannedUrlParameters;
 import com.mastfrog.acteur.preconditions.BasicAuth;
@@ -43,8 +41,8 @@ import com.timboudreau.trackerapi.support.AuthorizedChecker;
 @BasicAuth
 @Methods({PUT})
 @PathRegex(Timetracker.URL_PATTERN_TIME)
-@RequiredUrlParameters({"start", "end"})
-@BannedUrlParameters({"added", "type"})
+@RequiredUrlParameters({Properties.start, Properties.end})
+@BannedUrlParameters({Properties.added, Properties.type})
 @Precursors({CheckParameters.class, CreateCollectionPolicy.CreatePolicy.class,
     AuthorizedChecker.class, TimeCollectionFinder.class})
 @Description("Add A Time Event")
@@ -112,8 +110,8 @@ final class AddTimeResource extends Acteur {
         ObjectId id = (ObjectId) m.get(_id);
         if (id != null) {
             add(Headers.stringHeader("X-Tracker-ID"), id.toString());
-            if (evt.getParameter("localId") != null) {
-                add(Headers.stringHeader("X-Local-ID"), evt.getParameter("localId"));
+            if (evt.getParameter(Properties.localId) != null) {
+                add(Headers.stringHeader("X-Local-ID"), evt.getParameter(Properties.localId));
             }
         }
         setState(new RespondWith(HttpResponseStatus.ACCEPTED, m));

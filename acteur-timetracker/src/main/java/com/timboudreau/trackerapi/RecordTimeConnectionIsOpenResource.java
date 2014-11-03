@@ -76,7 +76,7 @@ final class RecordTimeConnectionIsOpenResource extends Acteur implements Channel
         coll.get().insert(toWrite, WriteConcern.FSYNC_SAFE);
         ObjectId id = (ObjectId) toWrite.get(_id);
         add(Headers.stringHeader("X-Tracker-ID"), id.toStringMongod());
-        if (evt.getParameter("localId") != null) {
+        if (evt.getParameter(Properties.localId) != null) {
             add(Headers.stringHeader("X-Local-ID"), evt.getParameter(localId));
         }
 
@@ -157,10 +157,8 @@ final class RecordTimeConnectionIsOpenResource extends Acteur implements Channel
                         if (!undot(e.getKey(), l, toWrite)) {
                             return "Empty sub-property name or presence of . or $ in " + e.getKey();
                         }
-                    } else {
-                        if (!undot(e.getKey(), e.getValue(), toWrite)) {
-                            return "Empty sub-property name or presence of . or $ in " + e.getKey();
-                        }
+                    } else if (!undot(e.getKey(), e.getValue(), toWrite)) {
+                        return "Empty sub-property name or presence of . or $ in " + e.getKey();
                     }
             }
         }

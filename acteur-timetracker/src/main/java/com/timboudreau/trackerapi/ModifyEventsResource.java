@@ -67,11 +67,10 @@ public final class ModifyEventsResource extends Acteur {
             } else {
                 something = new Body(1);
             }
-            System.out.println("Loaded body " + something);
             DBObject modification = new BasicDBObject(isDelete ? "$unset"
                     : "$set", new BasicDBObject(evt.getPath().getLastElement().toString(),
-                            something.object)).append("$inc", new BasicDBObject("version", 1));
-            
+                            something.object)).append("$inc", new BasicDBObject(Properties.version, 1));
+
             WriteResult res = collection.update(query, modification, false, true, WriteConcern.ACKNOWLEDGED);
             String resultJson = Timetracker.quickJson("updated", res.getN());
             setState(new RespondWith(res.getN() > 0 ? HttpResponseStatus.ACCEPTED

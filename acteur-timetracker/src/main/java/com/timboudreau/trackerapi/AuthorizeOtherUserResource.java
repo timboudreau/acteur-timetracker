@@ -46,7 +46,7 @@ public class AuthorizeOtherUserResource extends Acteur {
             return;
         }
         // Create a query
-        BasicDBObject query = new BasicDBObject("_id", user.id());
+        BasicDBObject query = new BasicDBObject(Properties._id, user.id());
         // And an update
         BasicDBObject update = new BasicDBObject("$addToSet", new BasicDBObject(Properties.authorizes,
                 other.id()));

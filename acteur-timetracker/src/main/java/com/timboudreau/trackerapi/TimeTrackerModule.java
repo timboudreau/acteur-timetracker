@@ -42,8 +42,8 @@ import com.timboudreau.trackerapi.support.UserFromUrl;
 import org.bson.types.ObjectId;
 
 /**
- * Initializes the Time Tracker application.  Implements MongoInitializer so
- * it can be used from other applications
+ * Initializes the Time Tracker application. Implements MongoInitializer so it
+ * can be used from other applications
  *
  * @author Tim Boudreau
  */

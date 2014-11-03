@@ -32,6 +32,7 @@ import org.joda.time.Interval;
  */
 public enum TrackerAPI implements WebCallEnum {
 
+    GET_API_VERSION(new WebCallBuilder().method(GET).path("hello")),
     DISTINCT_FIELDS(new WebCallBuilder().method(GET).path("users/{{userid}}/time/{{seriesid}}/distinct").authenticationRequired().addRequiredTypes(UserID.class, SeriesID.class).withDecorator(String.class, FieldNameFromString.class)),
     DELETE_TIME(new WebCallBuilder().method(DELETE).path("users/{{userid}}/time/{{seriesid}}").authenticationRequired().addRequiredTypes(UserID.class, SeriesID.class).withDecorator(EventQuery.class, EventQueryDecorator.class)),
     DELETE_FIELDS(new WebCallBuilder().method(DELETE).path("users/{{userid}}/update/{{seriesid}}/{{eventid}}").authenticationRequired().addRequiredTypes(UserID.class, SeriesID.class, EventID.class)),

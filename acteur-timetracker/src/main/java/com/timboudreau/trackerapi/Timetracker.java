@@ -31,6 +31,9 @@ import com.mastfrog.jackson.JacksonModule;
 import com.mastfrog.settings.Settings;
 import com.mastfrog.settings.SettingsBuilder;
 import com.mastfrog.url.Path;
+import com.mastfrog.util.Checks;
+import com.mastfrog.util.Exceptions;
+import com.mastfrog.util.Streams;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
@@ -42,6 +45,7 @@ import static com.timboudreau.trackerapi.Properties.name;
 import static com.timboudreau.trackerapi.Properties.pass;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import java.io.IOException;
+import java.io.InputStream;
 import org.joda.time.Interval;
 
 /**
@@ -72,7 +76,6 @@ public class Timetracker extends GenericApplication {
     }
 
     public static ServerControl start(String... args) throws IOException {
-        System.out.println("ARGS " + java.util.Arrays.asList(args));
         // Set up our defaults - can be overridden in
         // /etc/timetracker.json, ~/timetracker.json and ./timetracker.json
         // or with command-line arguments
@@ -80,6 +83,7 @@ public class Timetracker extends GenericApplication {
                 .addDefaultLocations()
                 .add(PathFactory.BASE_PATH_SETTINGS_KEY, "time")
                 .parseCommandLineArguments(args)
+                .add(loadVersionProperties())
                 .build();
 
         // Set up the Guice injector with our settings and modules.  Dependencies
@@ -132,6 +136,7 @@ public class Timetracker extends GenericApplication {
     }
 
     static class PasswordResetAndExit {
+
         @Inject
         PasswordResetAndExit(Settings settings, @Named(USER_COLLECTION) DBCollection coll, PasswordHasher hasher) {
             boolean isReset = settings.getBoolean("reset", false);
@@ -143,7 +148,7 @@ public class Timetracker extends GenericApplication {
                     String hashed = hasher.encryptPassword(password);
                     DBObject query = coll.findOne(new BasicDBObject(name, user));
                     if (query != null) {
-                        DBObject update = UpdateBuilder.$().increment("version").set(pass, hashed).build();
+                        DBObject update = UpdateBuilder.$().increment(Properties.version).set(pass, hashed).build();
                         WriteResult res = coll.update(query, update, false, false, WriteConcern.FSYNCED);
                         System.out.println("Updated password for user " + user + " with result " + res);
                     } else {
@@ -166,5 +171,22 @@ public class Timetracker extends GenericApplication {
             binder.bind(PasswordResetAndExit.class).asEagerSingleton();
         }
 
+    }
+
+    static java.util.Properties loadVersionProperties() {
+        String pth = "META-INF/maven/com/mastfrog/trackerapi/pom.properties";
+        InputStream[] streams = Streams.locate(pth);
+        java.util.Properties result = new java.util.Properties();
+        if (streams != null && streams.length > 0) {
+            try (InputStream in = streams[0]) {
+                System.out.println("Load maven properties");
+                result.load(in);
+            } catch (IOException ioe) {
+                return Exceptions.chuck(ioe);
+            }
+        } else {
+            result.setProperty("version", "1.4.9");
+        }
+        return result;
     }
 }

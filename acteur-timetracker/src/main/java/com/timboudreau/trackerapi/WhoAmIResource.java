@@ -35,7 +35,7 @@ public class WhoAmIResource extends Acteur {
     @Inject
     WhoAmIResource(TTUser user, @Named(USER_COLLECTION) DBCollection coll, ObjectMapper mapper) throws IOException {
         add(Headers.stringHeader("UserID"), user.id().toString());
-        DBObject ob = coll.findOne(new BasicDBObject("_id", user.id()));
+        DBObject ob = coll.findOne(new BasicDBObject(Properties._id, user.id()));
         if (ob == null) {
             setState(new RespondWith(Err.gone("No record of " + user.name())));
             return;
