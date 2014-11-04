@@ -34,6 +34,7 @@ import org.junit.After;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -325,7 +326,8 @@ public class TrackerAPITest {
         System.err.println("Remote start time" + start);
         Thread.sleep(WAIT_FOR);
         ls.end();
-        Thread.sleep(250);
+        liveListener.waitForCancel();
+        Thread.sleep(450);
         assertTrue(liveListener.cancelled);
 
         H<Event[]> evtH = getEvents(series, EventQuery.create().startsAt(start), new H<>(Event[].class));
@@ -421,17 +423,32 @@ public class TrackerAPITest {
         private final CountDownLatch latch = new CountDownLatch(1);
         volatile boolean error;
         int count = 0;
-        private boolean cancelled;
+        private volatile boolean cancelled;
 
         @Override
         public void onError(Throwable thrown) {
             thrown.printStackTrace();
             error = true;
         }
+        
+        void waitForCancel() {
+            if (cancelled) {
+                return;
+            }
+            synchronized(this) {
+                try {
+                    wait(1000);
+                } catch (InterruptedException ex) {
+                }
+            }
+        }
 
         @Override
         public void onClose() {
             cancelled = true;
+            synchronized(this) {
+                notifyAll();
+            }
         }
 
         @Override
