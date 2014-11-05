@@ -332,6 +332,7 @@ public class TrackerAPITest {
 
         H<Event[]> evtH = getEvents(series, EventQuery.create().startsAt(start), new H<>(Event[].class));
         Event[] queryResults = evtH.await();
+        Thread.sleep(250);
         assertNotNull(queryResults);
         assertEquals(1, queryResults.length);
 
