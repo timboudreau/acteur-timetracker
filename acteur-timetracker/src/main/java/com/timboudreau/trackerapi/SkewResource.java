@@ -14,6 +14,7 @@ import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.ParametersMustBeNumbersIfPresent;
 import com.mastfrog.acteur.preconditions.Path;
 import static com.timboudreau.trackerapi.Properties.time;
+import com.timboudreau.trackerapi.support.TTUser;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +23,7 @@ import java.util.Map;
  *
  * @author Tim Boudreau
  */
-@HttpCall
+@HttpCall(scopeTypes = {TTUser.class})
 @Path("skew")
 @Methods(GET)
 @ParametersMustBeNumbersIfPresent("time")

@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.inject.Inject;
 import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.Acteur.RespondWith;
+import com.mastfrog.acteur.ContentConverter;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.annotations.Precursors;
 import com.mastfrog.acteur.errors.Err;
+import com.mastfrog.acteur.headers.Headers;
 import static com.mastfrog.acteur.headers.Method.DELETE;
 import static com.mastfrog.acteur.headers.Method.PUT;
 import com.mastfrog.acteur.preconditions.BannedUrlParameters;
@@ -48,17 +50,17 @@ public final class ModifyEventsResource extends Acteur {
     public static final String PAT = "^users/(.*?)/update/(.*?)/(.*?)$";
 
     @Inject
-    public ModifyEventsResource(HttpEvent evt, DBCollection collection, BasicDBObject query) throws IOException {
+    public ModifyEventsResource(HttpEvent evt, DBCollection collection, BasicDBObject query, ContentConverter converter) throws IOException {
         try {
             query.put(type, time);
             Body something = null;
             boolean isDelete = evt.getMethod() == DELETE;
             if (!isDelete) {
                 try {
-                    something = evt.getContentAsJSON(Body.class);
+                    something = converter.toObject(evt.getContent(), evt.getHeader(Headers.CONTENT_TYPE), Body.class);
                 } catch (JsonMappingException e) {
                     try {
-                        something = new Body(evt.getContentAsJSON(Map.class));
+                        something = new Body(converter.toObject(evt.getContent(), evt.getHeader(Headers.CONTENT_TYPE), Map.class));
                     } catch (JsonMappingException e2) {
                         setState(new RespondWith(Err.badRequest("Bad JSON: " + e.getMessage())));
                         return;

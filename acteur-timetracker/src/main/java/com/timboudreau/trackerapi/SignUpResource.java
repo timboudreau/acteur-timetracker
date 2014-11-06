@@ -10,6 +10,7 @@ import com.mastfrog.acteur.errors.Err;
 import static com.mastfrog.acteur.headers.Method.POST;
 import static com.mastfrog.acteur.headers.Method.PUT;
 import com.mastfrog.acteur.preconditions.Description;
+import com.mastfrog.acteur.preconditions.InjectRequestBodyAs;
 import com.mastfrog.acteur.preconditions.MaximumPathLength;
 import com.mastfrog.acteur.preconditions.MaximumRequestBodyLength;
 import com.mastfrog.acteur.preconditions.Methods;
@@ -43,6 +44,7 @@ import static com.timboudreau.trackerapi.Timetracker.USER_COLLECTION;
 @Description("New user signup")
 @MinimumRequestBodyLength(SignUpResource.MIN_PASSWORD_LENGTH)
 @MaximumRequestBodyLength(SignUpResource.MAX_PASSWORD_LENGTH)
+@InjectRequestBodyAs(String.class)
 class SignUpResource extends Acteur {
 
     public static final int MAX_PASSWORD_LENGTH = 40;
@@ -51,7 +53,7 @@ class SignUpResource extends Acteur {
     public static final int MIN_USERNAME_LENGTH = 3;
 
     @Inject
-    SignUpResource(@Named(USER_COLLECTION) DBCollection coll, HttpEvent evt, PasswordHasher crypto, ObjectMapper mapper) throws UnsupportedEncodingException, IOException {
+    SignUpResource(@Named(USER_COLLECTION) DBCollection coll, HttpEvent evt, PasswordHasher crypto, ObjectMapper mapper, String password) throws UnsupportedEncodingException, IOException {
         String userName = evt.getPath().getElement(1).toString();
         DBObject existing = coll.findOne(new BasicDBObject(name, userName), new BasicDBObject(Properties._id, true));
         if (existing != null) {
@@ -62,7 +64,6 @@ class SignUpResource extends Acteur {
                 .append(displayName, evt.getParameter(displayName))
                 .append(created, DateTime.now().getMillis())
                 .append(version, 0).append(authorizes, new ObjectId[0]);
-        String password = evt.getContentAsJSON(String.class);
         String encrypted = crypto.encryptPassword(password);
         nue.put(pass, encrypted);
         nue.put(origPass, encrypted);

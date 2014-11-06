@@ -12,6 +12,7 @@ import static com.mastfrog.acteur.headers.Method.PUT;
 import com.mastfrog.acteur.mongo.util.UpdateBuilder;
 import com.mastfrog.acteur.preconditions.BasicAuth;
 import com.mastfrog.acteur.preconditions.Description;
+import com.mastfrog.acteur.preconditions.InjectRequestBodyAs;
 import com.mastfrog.acteur.preconditions.MaximumRequestBodyLength;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.MinimumRequestBodyLength;
@@ -40,13 +41,13 @@ import java.io.IOException;
 @MinimumRequestBodyLength(SignUpResource.MIN_PASSWORD_LENGTH)
 @MaximumRequestBodyLength(SignUpResource.MAX_PASSWORD_LENGTH)
 @Precursors({AuthorizedChecker.class})
+@InjectRequestBodyAs(String.class)
 @Description("Set a user's password")
 public class SetPasswordResource extends Acteur {
 
     @Inject
-    SetPasswordResource(@Named(USER_COLLECTION) DBCollection coll, HttpEvent evt, PasswordHasher hasher, TTUser user) throws IOException {
+    SetPasswordResource(@Named(USER_COLLECTION) DBCollection coll, HttpEvent evt, PasswordHasher hasher, TTUser user, String pw) throws IOException {
         String userName = evt.getPath().getElement(1).toString();
-        String pw = evt.getContentAsJSON(String.class);
         if (!userName.equals(user.name())) {
             setState(new RespondWith(Err.forbidden(user.name()
                     + " cannot set the password for " + userName)));
