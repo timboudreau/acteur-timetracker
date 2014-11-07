@@ -32,10 +32,10 @@ import java.util.Map;
 class ListUsersResource extends Acteur {
 
     @Inject
-    ListUsersResource(@Named(USER_COLLECTION) DBCollection coll, HttpEvent evt, Closables clos) {
+    ListUsersResource(@Named(USER_COLLECTION) DBCollection coll, HttpEvent evt, Method method, Closables clos) {
         DBCursor cursor = coll.find();
         ok();
-        if (evt.getMethod() == Method.GET) {
+        if (method == Method.GET) {
             setResponseWriter(new CursorWriter(cursor, clos, evt, Providers.<MapFilter>of(new MF())));
         }
     }

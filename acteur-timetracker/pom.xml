@@ -45,6 +45,12 @@
             <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.mastfrog</groupId>
+            <artifactId>numble</artifactId>
+            <version>1.5.0</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

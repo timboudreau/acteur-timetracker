@@ -12,7 +12,7 @@ import com.mastfrog.acteur.mongo.util.UpdateBuilder;
 import com.mastfrog.acteur.preconditions.BannedUrlParameters;
 import com.mastfrog.acteur.preconditions.BasicAuth;
 import com.mastfrog.acteur.preconditions.Description;
-import com.mastfrog.acteur.preconditions.InjectParametersAsInterface;
+import com.mastfrog.acteur.preconditions.InjectUrlParametersAs;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.ParametersMustBeNumbersIfPresent;
 import com.mastfrog.acteur.preconditions.PathRegex;
@@ -50,7 +50,7 @@ import java.io.IOException;
 @RequireAtLeastOneUrlParameterFrom({Properties.shift, Properties.moveTo, Properties.length, Properties.newStart, Properties.newEnd})
 @ParametersMustBeNumbersIfPresent(value = {Properties.newStart, Properties.newEnd, Properties.shift, Properties.moveTo, Properties.length}, allowDecimal = false, allowNegative = true)
 @Description("Adjust records by shifting, moving or changing start, end or length")
-@InjectParametersAsInterface(AdjustParameters.class)
+@InjectUrlParametersAs(AdjustParameters.class)
 @Precursors({AuthorizedChecker.class, CreateCollectionPolicy.DontCreatePolicy.class,
     TimeCollectionFinder.class})
 class AdjustTimeResource extends Acteur {

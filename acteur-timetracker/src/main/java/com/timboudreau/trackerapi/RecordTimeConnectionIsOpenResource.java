@@ -5,6 +5,7 @@ import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.Application;
+import com.mastfrog.acteur.Closables;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.annotations.Precursors;
@@ -55,7 +56,7 @@ final class RecordTimeConnectionIsOpenResource extends Acteur implements Channel
     private final AtomicBoolean isRunning = new AtomicBoolean(true);
 
     @Inject
-    RecordTimeConnectionIsOpenResource(@Named("periodicLiveWrites") final boolean pings, final HttpEvent evt, final Provider<DBCollection> coll, TTUser user, Application application, final Provider<LiveWriter> writer) {
+    RecordTimeConnectionIsOpenResource(@Named("periodicLiveWrites") final boolean pings, final HttpEvent evt, final Provider<DBCollection> coll, TTUser user, Application application, final Provider<LiveWriter> writer, Closables clos) {
         toWrite.append(by, user.idAsString())
                 .append(start, created)
                 .append(end, created)
@@ -88,9 +89,10 @@ final class RecordTimeConnectionIsOpenResource extends Acteur implements Channel
         if (pings) {
             writer.get().add(c);
         }
-        evt.getChannel().closeFuture().addListener(new ChannelFutureListener() {
+        clos.add(new AutoCloseable() {
+
             @Override
-            public void operationComplete(ChannelFuture future) throws Exception {
+            public void close() throws Exception {
                 isRunning.set(false);
                 try {
                     c.call();

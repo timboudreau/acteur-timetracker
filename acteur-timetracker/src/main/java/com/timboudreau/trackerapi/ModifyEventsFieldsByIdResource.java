@@ -86,7 +86,7 @@ public final class ModifyEventsFieldsByIdResource extends Acteur {
                 try {
                     mod.put(key, Long.parseLong(mod.get(key).toString()));
                 } catch (NumberFormatException ex) {
-                    setState(new RespondWith(Err.badRequest("Duration must be a string but is " + mod.get(key))));
+                    setState(new RespondWith(Err.badRequest("Duration must parse to a number but is " + mod.get(key))));
                     return false;
                 }
             } else {

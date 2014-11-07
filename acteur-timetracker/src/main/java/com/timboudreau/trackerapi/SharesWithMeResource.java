@@ -37,7 +37,7 @@ import java.io.IOException;
 public class SharesWithMeResource extends Acteur {
 
     @Inject
-    SharesWithMeResource(HttpEvent evt, TTUser user, @Named(Timetracker.USER_COLLECTION) DBCollection coll, ObjectMapper mapper) throws IOException {
+    SharesWithMeResource(TTUser user, @Named(Timetracker.USER_COLLECTION) DBCollection coll) throws IOException {
         add(Headers.stringHeader("UserID"), user.id().toString());
         BasicDBObject projection = new BasicDBObject(Properties._id, 1).append(name, 1).append(displayName, 1);
         DBCursor cursor = coll.find(new BasicDBObject(authorizes, user.id()), projection);
@@ -49,7 +49,7 @@ public class SharesWithMeResource extends Acteur {
             setState(new RespondWith(200, "[]\n"));
             cursor.close();
         } else {
-            setState(new ConsumedLockedState(cursor));
+            setState(new ConsumedLockedState(cursor.toArray()));
         }
     }
 }

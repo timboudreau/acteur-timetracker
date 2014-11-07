@@ -31,7 +31,7 @@ import java.util.Map;
 public class SkewResource extends Acteur {
 
     @Inject
-    SkewResource(ActeurFactory af, HttpEvent evt, Provider<ObjectMapper> mapper) throws IOException {
+    SkewResource(HttpEvent evt) throws IOException {
         long now = System.currentTimeMillis();
         Optional<Long> l = evt.getLongParameter(time);
         Map<String, Object> m = new HashMap<>();

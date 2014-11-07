@@ -41,7 +41,7 @@ public class ListUsersTimeEventSetsResource extends Acteur {
     public static final String PAT = "^users/(.*?)/list$";
 
     @Inject
-    ListUsersTimeEventSetsResource(HttpEvent evt, DB db, TTUser user, ObjectMapper mapper) throws IOException {
+    ListUsersTimeEventSetsResource(HttpEvent evt, Method method, DB db, TTUser user, ObjectMapper mapper) throws IOException {
         List<String> l = new ArrayList<>();
         String pfix = new StringBuilder(evt.getPath().getElement(1).toString()).append('_').toString();
         for (String coll : db.getCollectionNames()) {
@@ -50,7 +50,7 @@ public class ListUsersTimeEventSetsResource extends Acteur {
             }
         }
         Collections.sort(l);
-        if (evt.getMethod() == Method.HEAD) {
+        if (method == Method.HEAD) {
             ok();
         } else {
             ok(l);

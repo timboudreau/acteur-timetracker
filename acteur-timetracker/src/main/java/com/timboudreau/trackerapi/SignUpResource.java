@@ -53,7 +53,7 @@ class SignUpResource extends Acteur {
     public static final int MIN_USERNAME_LENGTH = 3;
 
     @Inject
-    SignUpResource(@Named(USER_COLLECTION) DBCollection coll, HttpEvent evt, PasswordHasher crypto, ObjectMapper mapper, String password) throws UnsupportedEncodingException, IOException {
+    SignUpResource(@Named(USER_COLLECTION) DBCollection coll, HttpEvent evt, PasswordHasher crypto, String password) throws UnsupportedEncodingException, IOException {
         String userName = evt.getPath().getElement(1).toString();
         DBObject existing = coll.findOne(new BasicDBObject(name, userName), new BasicDBObject(Properties._id, true));
         if (existing != null) {
