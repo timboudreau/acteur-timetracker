@@ -9,6 +9,7 @@ import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.annotations.Precursors;
 import com.mastfrog.acteur.errors.Err;
 import static com.mastfrog.acteur.headers.Method.PUT;
+import com.mastfrog.acteur.preconditions.Authenticated;
 import com.mastfrog.acteur.preconditions.BasicAuth;
 import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
@@ -28,7 +29,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
  * @author Tim Boudreau
  */
 @HttpCall
-@BasicAuth
+@Authenticated
 @PathRegex("^users/.*?/deauthorize/.*?")
 @Methods(PUT)
 @Precursors({AuthorizedChecker.class})

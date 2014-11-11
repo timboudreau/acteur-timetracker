@@ -10,6 +10,7 @@ import com.mastfrog.acteur.errors.Err;
 import static com.mastfrog.acteur.headers.Method.POST;
 import static com.mastfrog.acteur.headers.Method.PUT;
 import com.mastfrog.acteur.mongo.util.UpdateBuilder;
+import com.mastfrog.acteur.preconditions.Authenticated;
 import com.mastfrog.acteur.preconditions.BasicAuth;
 import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.InjectRequestBodyAs;
@@ -35,7 +36,7 @@ import java.io.IOException;
  * @author Tim Boudreau
  */
 @HttpCall
-@BasicAuth
+@Authenticated
 @PathRegex("^users/(.*?)/password$")
 @Methods({PUT, POST})
 @MinimumRequestBodyLength(SignUpResource.MIN_PASSWORD_LENGTH)

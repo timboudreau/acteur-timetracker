@@ -10,6 +10,7 @@ import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.mongo.CursorWriterActeur;
 import com.mastfrog.acteur.headers.Headers;
 import static com.mastfrog.acteur.headers.Method.GET;
+import com.mastfrog.acteur.preconditions.Authenticated;
 import com.mastfrog.acteur.preconditions.BasicAuth;
 import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
@@ -31,7 +32,7 @@ import java.io.IOException;
 @HttpCall
 @PathRegex("^users/.*?/sharers/?$")
 @Methods(GET)
-@BasicAuth
+@Authenticated
 @Description("List other uses whose events I can read or modify")
 @Concluders(CursorWriterActeur.class)
 public class SharesWithMeResource extends Acteur {

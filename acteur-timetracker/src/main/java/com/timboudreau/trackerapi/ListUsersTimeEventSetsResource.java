@@ -9,6 +9,7 @@ import com.mastfrog.acteur.annotations.Precursors;
 import com.mastfrog.acteur.headers.Method;
 import static com.mastfrog.acteur.headers.Method.GET;
 import static com.mastfrog.acteur.headers.Method.HEAD;
+import com.mastfrog.acteur.preconditions.Authenticated;
 import com.mastfrog.acteur.preconditions.BannedUrlParameters;
 import com.mastfrog.acteur.preconditions.BasicAuth;
 import com.mastfrog.acteur.preconditions.Description;
@@ -30,7 +31,7 @@ import java.util.List;
  * @author Tim Boudreau
  */
 @HttpCall
-@BasicAuth
+@Authenticated
 @PathRegex(PAT)
 @Methods({GET, HEAD})
 @BannedUrlParameters(type)

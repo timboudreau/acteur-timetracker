@@ -9,6 +9,7 @@ import com.mastfrog.acteur.annotations.Precursors;
 import com.mastfrog.acteur.errors.Err;
 import static com.mastfrog.acteur.headers.Method.POST;
 import static com.mastfrog.acteur.headers.Method.PUT;
+import com.mastfrog.acteur.preconditions.Authenticated;
 import com.mastfrog.acteur.preconditions.BannedUrlParameters;
 import com.mastfrog.acteur.preconditions.BasicAuth;
 import com.mastfrog.acteur.preconditions.Description;
@@ -40,7 +41,7 @@ import org.joda.time.DateTimeUtils;
  * @author Tim Boudreau
  */
 @HttpCall
-@BasicAuth
+@Authenticated
 @PathRegex("^users/([^/]*?)/?$")
 @Methods({PUT, POST})
 @BannedUrlParameters({Properties._id, Properties.name, Properties.pass, Properties.origPass, Properties.authorizes})

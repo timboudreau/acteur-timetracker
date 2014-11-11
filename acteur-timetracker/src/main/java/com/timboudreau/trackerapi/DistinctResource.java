@@ -6,6 +6,7 @@ import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.annotations.Precursors;
 import static com.mastfrog.acteur.headers.Method.GET;
+import com.mastfrog.acteur.preconditions.Authenticated;
 import com.mastfrog.acteur.preconditions.BasicAuth;
 import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
@@ -25,7 +26,7 @@ import com.timboudreau.trackerapi.support.TimeCollectionFinder;
 @PathRegex("^users/(.*?)/time/(.*?)/distinct$")
 @Methods(GET)
 @RequiredUrlParameters("field")
-@BasicAuth
+@Authenticated
 @Description("Get all unique values of a field, e.g. /users/joe/time/stuff/distinct?field=activity")
 @Precursors({CreateCollectionPolicy.DontCreatePolicy.class, AuthorizedChecker.class, TimeCollectionFinder.class})
 public class DistinctResource extends Acteur {

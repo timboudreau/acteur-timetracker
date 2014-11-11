@@ -8,8 +8,8 @@ import com.mastfrog.acteur.annotations.Precursors;
 import com.mastfrog.acteur.errors.Err;
 import com.mastfrog.acteur.headers.Headers;
 import static com.mastfrog.acteur.headers.Method.PUT;
+import com.mastfrog.acteur.preconditions.Authenticated;
 import com.mastfrog.acteur.preconditions.BannedUrlParameters;
-import com.mastfrog.acteur.preconditions.BasicAuth;
 import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.PathRegex;
@@ -38,7 +38,7 @@ import com.timboudreau.trackerapi.support.AuthorizedChecker;
  * @author Tim Boudreau
  */
 @HttpCall
-@BasicAuth
+@Authenticated
 @Methods({PUT})
 @PathRegex(Timetracker.URL_PATTERN_TIME)
 @RequiredUrlParameters({Properties.start, Properties.end})

@@ -9,6 +9,7 @@ import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.annotations.Precursors;
 import com.mastfrog.acteur.errors.Err;
 import static com.mastfrog.acteur.headers.Method.POST;
+import com.mastfrog.acteur.preconditions.Authenticated;
 import com.mastfrog.acteur.preconditions.BannedUrlParameters;
 import com.mastfrog.acteur.preconditions.BasicAuth;
 import com.mastfrog.acteur.preconditions.Description;
@@ -34,7 +35,7 @@ import org.bson.types.ObjectId;
  * @author tim
  */
 @HttpCall
-@BasicAuth
+@Authenticated
 @Methods({POST})
 @PathRegex(PAT)
 @BannedUrlParameters({type, version})

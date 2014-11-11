@@ -12,6 +12,7 @@ import com.mastfrog.acteur.errors.Err;
 import com.mastfrog.acteur.headers.Headers;
 import static com.mastfrog.acteur.headers.Method.DELETE;
 import static com.mastfrog.acteur.headers.Method.PUT;
+import com.mastfrog.acteur.preconditions.Authenticated;
 import com.mastfrog.acteur.preconditions.BannedUrlParameters;
 import com.mastfrog.acteur.preconditions.BasicAuth;
 import com.mastfrog.acteur.preconditions.Description;
@@ -37,7 +38,7 @@ import java.util.List;
  * @author tim
  */
 @HttpCall
-@BasicAuth
+@Authenticated
 @Methods({PUT, DELETE})
 @PathRegex(PAT)
 @BannedUrlParameters(type)

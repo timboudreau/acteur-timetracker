@@ -9,8 +9,8 @@ import com.mastfrog.acteur.errors.Err;
 import static com.mastfrog.acteur.headers.Method.POST;
 import static com.mastfrog.acteur.headers.Method.PUT;
 import com.mastfrog.acteur.mongo.util.UpdateBuilder;
+import com.mastfrog.acteur.preconditions.Authenticated;
 import com.mastfrog.acteur.preconditions.BannedUrlParameters;
-import com.mastfrog.acteur.preconditions.BasicAuth;
 import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.InjectUrlParametersAs;
 import com.mastfrog.acteur.preconditions.Methods;
@@ -39,7 +39,7 @@ import java.io.IOException;
  * @author Tim Boudreau
  */
 @HttpCall
-@BasicAuth
+@Authenticated
 @PathRegex(URL_PATTERN_ADJUST)
 @Methods({PUT, POST})
 @BannedUrlParameters({Properties.type, Properties.version})

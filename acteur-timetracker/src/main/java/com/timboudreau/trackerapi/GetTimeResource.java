@@ -8,6 +8,7 @@ import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.annotations.Precursors;
 import com.mastfrog.acteur.headers.Method;
 import com.mastfrog.acteur.mongo.CursorWriter;
+import com.mastfrog.acteur.preconditions.Authenticated;
 import com.mastfrog.acteur.preconditions.BannedUrlParameters;
 import com.mastfrog.acteur.preconditions.BasicAuth;
 import com.mastfrog.acteur.preconditions.Description;
@@ -31,7 +32,7 @@ import io.netty.channel.Channel;
  * @author Tim Boudreau
  */
 @HttpCall
-@BasicAuth
+@Authenticated
 @PathRegex(Timetracker.URL_PATTERN_TIME)
 @Methods({Method.GET, Method.HEAD})
 @BannedUrlParameters(type)
