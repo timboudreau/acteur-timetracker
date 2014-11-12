@@ -8,7 +8,6 @@ import com.google.inject.name.Named;
 import com.mastfrog.acteur.Acteur;
 import com.timboudreau.trackerapi.support.CreateCollectionPolicy;
 import com.timboudreau.trackerapi.support.TTUser;
-import com.mastfrog.giulius.Dependencies;
 import com.mastfrog.guicy.annotations.Defaults;
 import com.mastfrog.guicy.annotations.Namespace;
 import com.mastfrog.acteur.Event;
@@ -18,20 +17,18 @@ import com.mastfrog.acteur.ImplicitBindings;
 import com.mastfrog.acteur.Page;
 import com.mastfrog.acteur.Response;
 import com.mastfrog.acteur.annotations.GenericApplication;
-import com.mastfrog.acteur.annotations.GenericApplicationModule;
 import com.mastfrog.acteur.headers.Headers;
 import com.mastfrog.acteur.mongo.util.UpdateBuilder;
 import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.server.PathFactory;
+import com.mastfrog.acteur.server.ServerBuilder;
 import com.mastfrog.acteur.util.CacheControl;
 import com.mastfrog.acteur.util.PasswordHasher;
 import com.mastfrog.acteur.util.Server;
-import com.mastfrog.acteur.util.ServerControl;
 import com.mastfrog.jackson.JacksonModule;
 import com.mastfrog.settings.Settings;
 import com.mastfrog.settings.SettingsBuilder;
 import com.mastfrog.url.Path;
-import com.mastfrog.util.Checks;
 import com.mastfrog.util.Exceptions;
 import com.mastfrog.util.Streams;
 import com.mongodb.BasicDBObject;
@@ -72,14 +69,11 @@ public class Timetracker extends GenericApplication {
     public static final String OTHER_USER = "other";
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        start(args).await();
-    }
-
-    public static ServerControl start(String... args) throws IOException {
         // Set up our defaults - can be overridden in
         // /etc/timetracker.json, ~/timetracker.json and ./timetracker.json
         // or with command-line arguments
         Settings settings = SettingsBuilder.forNamespace(TIMETRACKER)
+                .add("port", "7739")
                 .addDefaultLocations()
                 .add(PathFactory.BASE_PATH_SETTINGS_KEY, "time")
                 .parseCommandLineArguments(args)
@@ -88,19 +82,13 @@ public class Timetracker extends GenericApplication {
 
         // Set up the Guice injector with our settings and modules.  Dependencies
         // will bind our settings as @Named
-        Dependencies deps = Dependencies.builder()
-                .add(settings, TIMETRACKER)
-                .add(settings, Namespace.DEFAULT)
+        Server server = new ServerBuilder()
                 .add(new JacksonModule())
                 .add(new ResetPasswordModule())
-                .add(new GenericApplicationModule(settings, Timetracker.class, new Class[0])
-                ).build();
-
-        // Get the port we're using
-        int port = settings.getInt("port", 7739);
-        // Insantiate the server, start it and wait for it to exit
-        Server server = deps.getInstance(Server.class);
-        return server.start(port);
+                .applicationClass(Timetracker.class)
+                .add(settings).build();
+                
+        server.start().await();
     }
 
     @Override

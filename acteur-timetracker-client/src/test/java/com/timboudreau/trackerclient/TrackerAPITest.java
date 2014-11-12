@@ -51,6 +51,7 @@ public class TrackerAPITest {
     private ServerControl ctrl;
     private static int currPort = 57000;
     private MongoHarness harn;
+
     private void initServer(MongoHarness harn, DB db) throws IOException, InterruptedException {
         this.harn = harn;
         int mongoPort = harn.port();
@@ -72,8 +73,10 @@ public class TrackerAPITest {
         if (deps != null) {
             deps.shutdown();
         }
-        harn.stop();
-        Thread.sleep(5000);
+        if (harn != null) {
+            harn.stop();
+        }
+//        Thread.sleep(5000);
     }
 
     @Test
@@ -304,7 +307,7 @@ public class TrackerAPITest {
         return h;
     }
 
-    private  void testRecording() throws IOException, Exception {
+    private void testRecording() throws IOException, Exception {
         H<TrackerSession> hu = new H<>(TrackerSession.class);
         SeriesID series = new SeriesID("live");
         UserID userName = new UserID("wunky" + Long.toString(System.currentTimeMillis(), 36));
@@ -329,9 +332,8 @@ public class TrackerAPITest {
         liveListener.waitForCancel();
         Thread.sleep(450);
         assertTrue(liveListener.cancelled);
-        
-        // XXX fixme - some intermittent timing-based failures here
 
+        // XXX fixme - some intermittent timing-based failures here
 //        H<Event[]> evtH = getEvents(series, EventQuery.create().startsAt(start), new H<>(Event[].class));
 //        Event[] queryResults = evtH.await();
 //        Thread.sleep(250);
@@ -433,12 +435,12 @@ public class TrackerAPITest {
             thrown.printStackTrace();
             error = true;
         }
-        
+
         void waitForCancel() {
             if (cancelled) {
                 return;
             }
-            synchronized(this) {
+            synchronized (this) {
                 try {
                     wait(1000);
                 } catch (InterruptedException ex) {
@@ -449,7 +451,7 @@ public class TrackerAPITest {
         @Override
         public void onClose() {
             cancelled = true;
-            synchronized(this) {
+            synchronized (this) {
                 notifyAll();
             }
         }
