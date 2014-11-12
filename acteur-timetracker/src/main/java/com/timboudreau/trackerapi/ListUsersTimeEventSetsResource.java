@@ -51,10 +51,12 @@ public class ListUsersTimeEventSetsResource extends Acteur {
             }
         }
         Collections.sort(l);
-        if (method == Method.HEAD) {
-            ok();
-        } else {
-            ok(l);
+        switch(method) {
+            case HEAD :
+                ok();
+                break;
+            default :
+                ok(l);
         }
     }
 }

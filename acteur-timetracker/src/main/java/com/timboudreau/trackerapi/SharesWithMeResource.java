@@ -50,7 +50,7 @@ public class SharesWithMeResource extends Acteur {
             setState(new RespondWith(200, "[]\n"));
             cursor.close();
         } else {
-            setState(new ConsumedLockedState(cursor.toArray()));
+            setState(new ConsumedLockedState(cursor));
         }
     }
 }

@@ -33,10 +33,18 @@ class ListUsersResource extends Acteur {
 
     @Inject
     ListUsersResource(@Named(USER_COLLECTION) DBCollection coll, HttpEvent evt, Method method, Closables clos) {
-        DBCursor cursor = coll.find();
-        ok();
-        if (method == Method.GET) {
-            setResponseWriter(new CursorWriter(cursor, clos, evt, Providers.<MapFilter>of(new MF())));
+        switch (method) {
+            case GET:
+                DBCursor cursor = coll.find();
+                if (!cursor.hasNext()) {
+                    ok("[]\n");
+                } else {
+                    ok();
+                    setResponseWriter(new CursorWriter(cursor, clos, evt, Providers.<MapFilter>of(new MF())));
+                }
+                break;
+            default:
+                ok();
         }
     }
 
