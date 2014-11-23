@@ -2,15 +2,12 @@ package com.timboudreau.trackerapi;
 
 import com.google.inject.Inject;
 import com.mastfrog.acteur.Acteur;
-import com.mastfrog.acteur.Closables;
-import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.annotations.Precursors;
 import com.mastfrog.acteur.headers.Method;
 import com.mastfrog.acteur.mongo.CursorWriter;
 import com.mastfrog.acteur.preconditions.Authenticated;
 import com.mastfrog.acteur.preconditions.BannedUrlParameters;
-import com.mastfrog.acteur.preconditions.BasicAuth;
 import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.PathRegex;
@@ -31,7 +28,7 @@ import io.netty.channel.Channel;
  *
  * @author Tim Boudreau
  */
-@HttpCall
+@HttpCall(scopeTypes = {CreateCollectionPolicy.class, DBCollection.class})
 @Authenticated
 @PathRegex(Timetracker.URL_PATTERN_TIME)
 @Methods({Method.GET, Method.HEAD})
