@@ -173,7 +173,7 @@ public class Timetracker extends GenericApplication {
                 return Exceptions.chuck(ioe);
             }
         } else {
-            result.setProperty("version", "1.4.9");
+            result.setProperty("version", "1.5.1");
         }
         return result;
     }
