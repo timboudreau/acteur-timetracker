@@ -18,19 +18,14 @@
         </dependency>
         <dependency>
             <groupId>com.mastfrog</groupId>
-            <artifactId>acteur</artifactId>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.mastfrog</groupId>
             <artifactId>acteur-mongo</artifactId>
             <type>jar</type>
-        </dependency>        
+        </dependency>
         <dependency>
             <type>jar</type>
             <groupId>com.mastfrog</groupId>
             <artifactId>jackson</artifactId>
-        </dependency>        
+        </dependency>
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
