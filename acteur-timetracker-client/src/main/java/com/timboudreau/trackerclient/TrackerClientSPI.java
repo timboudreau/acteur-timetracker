@@ -27,7 +27,7 @@ public class TrackerClientSPI {
 
     final ReentrantScope scope;
     private final ObjectMapper mapper;
-    private final Invoker invoker;
+    private final Invoker<?> invoker;
 
     @Inject
     public TrackerClientSPI(ReentrantScope scope, ObjectMapper mapper, Invoker invoker) {

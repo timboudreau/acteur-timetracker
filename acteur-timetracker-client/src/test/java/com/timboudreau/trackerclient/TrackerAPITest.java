@@ -93,7 +93,7 @@ public class TrackerAPITest {
 
         String un = "jim" + Long.toString(System.currentTimeMillis(), 36);
 
-        H<TrackerSession> hu = new H(TrackerSession.class);
+        H<TrackerSession> hu = new H<>(TrackerSession.class);
         ResponseFuture fut = hu.future = spi.signup(un, "Moby Nightmare", "mobybaby", hu);
         fut.await();
         sess = hu.await();
