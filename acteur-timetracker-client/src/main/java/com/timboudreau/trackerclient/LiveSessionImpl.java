@@ -56,16 +56,16 @@ class LiveSessionImpl extends Receiver<State<?>> implements LiveSession {
                 State.HeadersReceived hr = (State.HeadersReceived) state;
                 HttpResponse resp = hr.get();
                 listener.set(this);
-                if (resp.getStatus().code() > 399) {
-                    listener.onFail(resp.getStatus() + "");
+                if (resp.status().code() > 399) {
+                    listener.onFail(resp.status() + "");
                 } else {
                     started = true;
                     if (resp != null) {
-                        String dt = resp.headers().get("X-Remote-Start");
+                        String dt = resp.headers().getAndConvert("X-Remote-Start");
                         if (dt != null) {
                             remoteStart = new DateTime(Long.parseLong(dt));
                         }
-                        trackerId = resp.headers().get("X-Tracker-ID");
+                        trackerId = resp.headers().getAndConvert("X-Tracker-ID");
                     }
                     System.out.println("LIVE SESSSION HEADERS RECEIVED " + listener);
                     listener.onRequestCompleted();

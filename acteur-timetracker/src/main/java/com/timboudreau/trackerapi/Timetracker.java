@@ -25,6 +25,7 @@ import com.mastfrog.acteur.server.ServerBuilder;
 import com.mastfrog.acteur.util.CacheControl;
 import com.mastfrog.acteur.util.PasswordHasher;
 import com.mastfrog.acteur.util.Server;
+import com.mastfrog.acteur.util.ServerControl;
 import com.mastfrog.jackson.JacksonModule;
 import com.mastfrog.settings.Settings;
 import com.mastfrog.settings.SettingsBuilder;
@@ -69,6 +70,10 @@ public class Timetracker extends GenericApplication {
     public static final String OTHER_USER = "other";
 
     public static void main(String[] args) throws IOException, InterruptedException {
+        start(args).await();
+    }
+    
+    public static ServerControl start(String... args) throws IOException {
         // Set up our defaults - can be overridden in
         // /etc/timetracker.json, ~/timetracker.json and ./timetracker.json
         // or with command-line arguments
@@ -88,7 +93,7 @@ public class Timetracker extends GenericApplication {
                 .applicationClass(Timetracker.class)
                 .add(settings).build();
                 
-        server.start().await();
+        return server.start();
     }
 
     @Override
