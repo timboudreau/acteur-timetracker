@@ -2,16 +2,23 @@ package com.timboudreau.trackerclient;
 
 import com.mastfrog.acteur.mongo.MongoHarness;
 import com.mastfrog.acteur.mongo.MongoModule;
+import com.mastfrog.acteur.server.PathFactory;
+import com.mastfrog.acteur.server.ServerBuilder;
+import com.mastfrog.acteur.util.Server;
 import com.mastfrog.acteur.util.ServerControl;
 import com.mastfrog.giulius.Dependencies;
 import com.mastfrog.giulius.tests.GuiceRunner;
 import com.mastfrog.giulius.tests.TestWith;
+import com.mastfrog.jackson.JacksonModule;
 import com.mastfrog.netty.http.client.ResponseFuture;
+import com.mastfrog.settings.Settings;
+import com.mastfrog.settings.SettingsBuilder;
 import com.mastfrog.util.Streams;
 import com.mastfrog.webapi.Callback;
 import com.mastfrog.webapi.builtin.Parameters;
 import com.mongodb.DB;
 import com.timboudreau.trackerapi.Timetracker;
+import static com.timboudreau.trackerapi.Timetracker.TIMETRACKER;
 import com.timboudreau.trackerclient.impl.TrackerModule;
 import com.timboudreau.trackerclient.pojos.Acknowledgement;
 import com.timboudreau.trackerclient.pojos.Event;
@@ -64,7 +71,7 @@ public class TrackerAPITest {
                 new TrackerModule("http://localhost:" + port)).build();
         spi = deps.getInstance(TrackerClientSPI.class);
     }
-
+    
     @After
     public void shutdown() throws InterruptedException {
         if (ctrl != null) {

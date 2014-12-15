@@ -83,6 +83,7 @@ final class AddTimeResource extends Acteur {
     }
 
     @Inject
+    @SuppressWarnings("unchecked")
     AddTimeResource(HttpEvent evt, DBCollection coll, TTUser user, Interval interval) throws IOException {
         // We have validated values
         long startVal = interval.getStartMillis();
