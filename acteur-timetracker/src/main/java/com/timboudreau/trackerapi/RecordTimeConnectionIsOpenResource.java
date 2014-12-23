@@ -13,7 +13,6 @@ import com.mastfrog.acteur.errors.Err;
 import com.mastfrog.acteur.headers.Headers;
 import static com.mastfrog.acteur.headers.Method.PUT;
 import com.mastfrog.acteur.preconditions.Authenticated;
-import com.mastfrog.acteur.preconditions.BasicAuth;
 import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.PathRegex;
@@ -71,6 +70,7 @@ final class RecordTimeConnectionIsOpenResource extends Acteur implements Channel
         }
         add(Headers.CONTENT_LENGTH, 3600000L);
         add(Headers.stringHeader("X-Remote-Start"), created + "");
+        add(Headers.stringHeader("X-Accel-Buffering"), "no");
         add(Headers.DATE, new DateTime(created));
         setChunked(false);
         setState(new RespondWith(HttpResponseStatus.ACCEPTED));
