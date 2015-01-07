@@ -30,7 +30,7 @@ public class TrackerModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        install(new WebApiModule(TrackerAPI.class));
+        install(new WebApiModule<TrackerAPI>(TrackerAPI.class));
         URL u = URL.parse(url);
         bind(HttpClient.class).toInstance(HttpClient.builder().followRedirects().build());
         Problems p = u.getProblems();
