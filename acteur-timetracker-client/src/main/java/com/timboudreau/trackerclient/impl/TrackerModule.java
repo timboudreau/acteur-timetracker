@@ -1,10 +1,9 @@
 package com.timboudreau.trackerclient.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import com.mastfrog.giulius.Dependencies;
+import com.mastfrog.jackson.JacksonModule;
 import com.mastfrog.netty.http.client.HttpClient;
 import com.mastfrog.url.URL;
 import com.mastfrog.webapi.WebApiModule;
@@ -40,8 +39,7 @@ public class TrackerModule extends AbstractModule {
         }
         bind(URL.class).toInstance(u);
         bind(String.class).annotatedWith(Names.named("baseUrl")).toInstance(url);
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JodaModule());
+        install(new JacksonModule());
     }
 
     public static TrackerClientSPI create() throws IOException {

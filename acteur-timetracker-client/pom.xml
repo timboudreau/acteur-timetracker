@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.mastfrog</groupId>
         <artifactId>mastfrog-parent</artifactId>
-        <version>1.5.3</version>
+        <version>1.5.4</version>
         <relativePath/>
     </parent>
     <artifactId>trackerclient</artifactId>
@@ -32,12 +32,10 @@
         <dependency>
             <groupId>com.mastfrog</groupId>
             <artifactId>generic-web-api</artifactId>
-            <version>${mastfrog.version}</version>
         </dependency>
         <dependency>
             <groupId>com.mastfrog</groupId>
             <artifactId>trackerapi</artifactId>
-            <version>${mastfrog.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -49,7 +47,6 @@
         <dependency>
             <groupId>com.mastfrog</groupId>
             <artifactId>netty-http-test-harness</artifactId>
-            <version>${mastfrog.version}</version>
             <scope>test</scope>
         </dependency>        
         <dependency>
@@ -80,8 +77,12 @@
         <dependency>
             <groupId>com.mastfrog</groupId>
             <artifactId>giulius-tests</artifactId>
-            <version>${mastfrog.version}</version>
             <scope>test</scope>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.mastfrog</groupId>
+            <artifactId>jackson</artifactId>
             <type>jar</type>
         </dependency>
     </dependencies>
