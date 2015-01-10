@@ -35,7 +35,7 @@ public final class TimeCollectionFinder extends Acteur {
         } else {
             coll = new CollectionProvider(db, collectionName, false).get();
         }
-        setState(new ConsumedLockedState(coll));
+        next(coll);
     }
 
     private static class CollectionProvider implements Provider<DBCollection> {

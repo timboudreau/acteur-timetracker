@@ -59,6 +59,6 @@ final class TotalTimeResource extends Acteur {
                 ivals.add(new Interval(startTime, endTime), "" + ob.get(Properties._id));
             }
         }
-        setState(new RespondWith(200, ivals.toJSON(detail, summary)));
+        ok(ivals.toJSON(detail, summary));
     }
 }

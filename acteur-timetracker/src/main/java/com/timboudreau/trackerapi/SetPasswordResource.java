@@ -60,6 +60,6 @@ public class SetPasswordResource extends Acteur {
         DBObject update = UpdateBuilder.$().increment(Properties.version).set(pass, hashed).build();
 
         WriteResult res = coll.update(query, update, false, false, WriteConcern.FSYNCED);
-        setState(new RespondWith(200, Timetracker.quickJson("updated", res.getN())));
+        ok(Timetracker.quickJson("updated", res.getN()));
     }
 }

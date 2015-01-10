@@ -85,8 +85,8 @@ class AdjustTimeResource extends Acteur {
             long newStart = params.newStart() == null ? (Long) ob.get(start) : params.newStart();
             long newEnd = params.newEnd() == null ? (Long) ob.get(end) : params.newEnd();
             if (params.moveTo() == null && newEnd < newStart) {
-                setState(new RespondWith(Err.gone("Start " + newStart
-                        + " will be after end " + newEnd)));
+                reply(Err.gone("Start " + newStart
+                        + " will be after end " + newEnd));
                 return;
             }
             if (params.newStart() != null || params.newEnd() != null) {
@@ -100,7 +100,7 @@ class AdjustTimeResource extends Acteur {
             }
             if (params.length() != null) {
                 if (params.length() < 0) {
-                    setState(new RespondWith(Err.badRequest("Negative length")));
+                    reply(Err.badRequest("Negative length"));
                     return;
                 }
                 if (params.newEnd() != null) {

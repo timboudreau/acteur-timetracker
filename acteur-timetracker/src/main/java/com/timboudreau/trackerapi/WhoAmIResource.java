@@ -44,6 +44,6 @@ public class WhoAmIResource extends Acteur {
         Map<String, Object> m = new HashMap<>(ob.toMap());
         m.remove(Properties.pass);
         m.remove(Properties.origPass);
-        setState(new RespondWith(200, mapper.writeValueAsString(m)));
+        ok(m);
     }
 }

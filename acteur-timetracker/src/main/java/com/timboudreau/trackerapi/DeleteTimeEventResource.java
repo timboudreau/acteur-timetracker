@@ -56,6 +56,6 @@ class DeleteTimeEventResource extends Acteur {
         query.put(type, time);
         query.remove(detail);
         WriteResult res = collection.remove(query, WriteConcern.ACKNOWLEDGED);
-        setState(new RespondWith(200, Timetracker.quickJson("updated", res.getN())));
+        ok(Timetracker.quickJson("updated", res.getN()));
     }
 }
