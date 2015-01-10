@@ -18,7 +18,7 @@ public final class TimeCollectionFinder extends Acteur {
 
     @Inject
     TimeCollectionFinder(Provider<DB> db, HttpEvent evt, TTUser u, CreateCollectionPolicy create) {
-        Provider<DBCollection> coll;
+        DBCollection coll;
         String userNameInURL = evt.getPath().getElement(1).toString();
 
         String category = evt.getPath().getElement(3).toString();
@@ -26,14 +26,14 @@ public final class TimeCollectionFinder extends Acteur {
         if (!db.get().collectionExists(collectionName)) {
             switch (create) {
                 case CREATE:
-                    coll = new CollectionProvider(db, collectionName, true);
+                    coll = new CollectionProvider(db, collectionName, true).get();
                     break;
                 default:
                     setState(new RespondWith(Err.gone("No collection " + collectionName)));
                     return;
             }
         } else {
-            coll = new CollectionProvider(db, collectionName, false);
+            coll = new CollectionProvider(db, collectionName, false).get();
         }
         setState(new ConsumedLockedState(coll));
     }

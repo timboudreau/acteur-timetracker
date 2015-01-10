@@ -119,6 +119,7 @@ public class TrackerAPITest {
         Event addedEvent;
         fut = addH.future = sess.addEvent(new Interval(now, then), addH,
                 new SeriesID("stuff"), Parameters.create("foo", "bar"));
+        
         addedEvent = addH.await();
         assertNotNull(addedEvent);
 

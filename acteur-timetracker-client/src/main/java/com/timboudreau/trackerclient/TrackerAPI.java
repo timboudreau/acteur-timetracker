@@ -39,6 +39,7 @@ public enum TrackerAPI implements WebCallEnum {
     MODIFY_FIELDS(new WebCallBuilder().method(POST).withDecorator(Map.class, BodyFromMap.class).path("users/{{userid}}/update/{{seriesid}}/{{eventid}}").authenticationRequired().addRequiredTypes(UserID.class, SeriesID.class, EventID.class)),
     @SuppressWarnings("unchecked")
     GET_TIMES(new WebCallBuilder().path("users/{{userid}}/time/{{seriesid}}").authenticationRequired().withDecorator(EventQuery.class, EventQueryDecorator.class).addRequiredTypes(UserID.class, SeriesID.class)),
+    @SuppressWarnings("unchecked")
     SIGNUP(new WebCallBuilder().addRequiredTypes(UserID.class, DisplayName.class).withDecorator(DisplayName.class, ParameterFromClassNameAndToStringCamelCase.class).withDecorator(String.class, BodyFromString.class).method(PUT).path("users/{{userid}}/signup")),
     LIST_USERS(GET, "all", false),
     LIST_SERIES(GET, "users/{{userid}}/list", true, UserID.class),
