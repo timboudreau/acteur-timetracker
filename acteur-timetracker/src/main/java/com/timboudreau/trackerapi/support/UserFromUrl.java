@@ -51,6 +51,7 @@ public class UserFromUrl implements Provider<TTUser> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public TTUser get() {
         HttpEvent evt = event.get();
         DBCollection users = usersCollection.get();

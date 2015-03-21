@@ -1,17 +1,14 @@
 package com.timboudreau.trackerapi;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.mastfrog.acteur.Acteur;
-import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.annotations.Concluders;
 import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.mongo.CursorWriterActeur;
 import com.mastfrog.acteur.headers.Headers;
 import static com.mastfrog.acteur.headers.Method.GET;
 import com.mastfrog.acteur.preconditions.Authenticated;
-import com.mastfrog.acteur.preconditions.BasicAuth;
 import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.PathRegex;
@@ -23,6 +20,7 @@ import static com.timboudreau.trackerapi.Properties.displayName;
 import static com.timboudreau.trackerapi.Properties.name;
 import com.timboudreau.trackerapi.support.TTUser;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import java.io.IOException;
 
 /**
@@ -47,10 +45,10 @@ public class SharesWithMeResource extends Acteur {
             return;
         }
         if (!cursor.hasNext()) {
-            setState(new RespondWith(200, "[]\n"));
+            reply(OK, "[]\n");
             cursor.close();
         } else {
-            setState(new ConsumedLockedState(cursor));
+            next(cursor);
         }
     }
 }

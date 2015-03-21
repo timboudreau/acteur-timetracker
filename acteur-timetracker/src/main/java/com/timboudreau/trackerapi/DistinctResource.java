@@ -34,6 +34,6 @@ public class DistinctResource extends Acteur {
     @Inject
     DistinctResource(HttpEvent evt, DBCollection coll) {
         String field = evt.getParameter("field");
-        setState(new RespondWith(200, coll.distinct(field)));
+        ok(coll.distinct(field));
     }
 }

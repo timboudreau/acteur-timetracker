@@ -75,14 +75,15 @@ final class AddTimeResource extends Acteur {
                 // Create an Interval which will be injected into the AddTimeResource
                 // constructor
                 Interval interval = new Interval(startTime, endTime);
-                setState(new ConsumedLockedState(interval));
+                next(interval);
             } catch (NumberFormatException e) {
-                setState(new RespondWith(Err.badRequest("Start or end is not a number: '" + evt.getParameter(start) + "' and '" + evt.getParameter(end))));
+                reply(Err.badRequest("Start or end is not a number: '" + evt.getParameter(start) + "' and '" + evt.getParameter(end)));
             }
         }
     }
 
     @Inject
+    @SuppressWarnings("unchecked")
     AddTimeResource(HttpEvent evt, DBCollection coll, TTUser user, Interval interval) throws IOException {
         // We have validated values
         long startVal = interval.getStartMillis();

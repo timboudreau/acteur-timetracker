@@ -52,8 +52,8 @@ import org.joda.time.Interval;
  * @author Tim Boudreau
  */
 // Classes which are injected:
-@ImplicitBindings({TTUser.class, DBCollection.class, CreateCollectionPolicy.class,
-    DBCursor.class, Interval.class, Body.class, AdjustTimeResource.AdjustParameters.class})
+//@ImplicitBindings({TTUser.class, DBCollection.class, CreateCollectionPolicy.class,
+//    DBCursor.class, Interval.class, Body.class, AdjustTimeResource.AdjustParameters.class})
 // Some default values for things
 @Defaults(namespace
         = @Namespace(Timetracker.TIMETRACKER),
@@ -72,7 +72,7 @@ public class Timetracker extends GenericApplication {
     public static void main(String[] args) throws IOException, InterruptedException {
         start(args).await();
     }
-    
+
     public static ServerControl start(String... args) throws IOException {
         // Set up our defaults - can be overridden in
         // /etc/timetracker.json, ~/timetracker.json and ./timetracker.json
@@ -90,9 +90,14 @@ public class Timetracker extends GenericApplication {
         Server server = new ServerBuilder()
                 .add(new JacksonModule())
                 .add(new ResetPasswordModule())
+                .withType(Interval.class, 
+                        DBCursor.class, 
+                        Interval.class, 
+                        Body.class
+                        )
                 .applicationClass(Timetracker.class)
                 .add(settings).build();
-                
+
         return server.start();
     }
 
@@ -178,7 +183,7 @@ public class Timetracker extends GenericApplication {
                 return Exceptions.chuck(ioe);
             }
         } else {
-            result.setProperty("version", "1.5.1");
+            result.setProperty("version", "1.5.2");
         }
         return result;
     }

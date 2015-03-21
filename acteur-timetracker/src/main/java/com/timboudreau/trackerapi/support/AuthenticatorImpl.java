@@ -56,6 +56,7 @@ public class AuthenticatorImpl implements Authenticator {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Object[] authenticate(String realm, BasicCredentials c) throws IOException {
         DBObject u = coll.get().findOne(new BasicDBObject(name, new String[]{c.username}));
         if (u == null) {

@@ -91,6 +91,7 @@ public final class Intervals implements Iterable<Interval> {
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     public void add(Interval ival, String id) {
         for (MI i : value) {
             if (merge(i, ival, id)) {
@@ -110,6 +111,7 @@ public final class Intervals implements Iterable<Interval> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Iterator<Interval> iterator() {
         return new WrapI(winnow().iterator());
     }

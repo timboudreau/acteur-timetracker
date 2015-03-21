@@ -94,6 +94,7 @@ public final class TimeTrackerModule extends AbstractModule implements MongoConf
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public MongoConfig addInitializer(Class type) {
         return mongoModule.addInitializer(type);
     }
