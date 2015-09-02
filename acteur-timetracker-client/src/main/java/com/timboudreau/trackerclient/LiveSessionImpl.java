@@ -61,11 +61,11 @@ class LiveSessionImpl extends Receiver<State<?>> implements LiveSession {
                 } else {
                     started = true;
                     if (resp != null) {
-                        String dt = resp.headers().getAndConvert("X-Remote-Start");
+                        String dt = resp.headers().getAsString("X-Remote-Start");
                         if (dt != null) {
                             remoteStart = new DateTime(Long.parseLong(dt));
                         }
-                        trackerId = resp.headers().getAndConvert("X-Tracker-ID");
+                        trackerId = resp.headers().getAsString("X-Tracker-ID");
                     }
                     System.out.println("LIVE SESSSION HEADERS RECEIVED " + listener);
                     listener.onRequestCompleted();

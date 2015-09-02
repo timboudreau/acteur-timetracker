@@ -119,7 +119,7 @@ public final class TimeTrackerModule extends AbstractModule implements MongoConf
         @Override
         protected void onCreateCollection(DBCollection collection) {
             if (USER_COLLECTION.equals(collection.getName())) {
-                collection.ensureIndex("name");
+                collection.createIndex("name");
             }
         }
     }
