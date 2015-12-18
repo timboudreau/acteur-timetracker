@@ -1,5 +1,6 @@
-<?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.mastfrog</groupId>
@@ -8,7 +9,6 @@
         <relativePath/>
     </parent>
     <artifactId>trackerclient</artifactId>
-    <packaging>jar</packaging>
     <name>Time Tracker API Client</name>
     <build>
         <plugins>
@@ -23,11 +23,6 @@
             </plugin>
         </plugins>
     </build>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <trackerapi.version>1.0</trackerapi.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.mastfrog</groupId>
@@ -42,13 +37,14 @@
             <groupId>com.mastfrog</groupId>
             <artifactId>acteur-mongo</artifactId>
             <scope>test</scope>
+            <version>${mastfrog.version}</version>
             <type>test-jar</type>
         </dependency>
         <dependency>
             <groupId>com.mastfrog</groupId>
             <artifactId>netty-http-test-harness</artifactId>
             <scope>test</scope>
-        </dependency>        
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -57,36 +53,29 @@
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-joda</artifactId>
-            <type>jar</type>
         </dependency>
         <dependency>
             <artifactId>jackson-core</artifactId>
             <groupId>com.fasterxml.jackson.core</groupId>
-            <type>jar</type>
         </dependency>
         <dependency>
             <artifactId>jackson-annotations</artifactId>
             <groupId>com.fasterxml.jackson.core</groupId>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.mastfrog</groupId>
             <artifactId>giulius-tests</artifactId>
             <scope>test</scope>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.mastfrog</groupId>
             <artifactId>jackson</artifactId>
-            <type>jar</type>
         </dependency>
     </dependencies>
-
     <repositories>
         <repository>
             <id>timboudreau-builds</id>

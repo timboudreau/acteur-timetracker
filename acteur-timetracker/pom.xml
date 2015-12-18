@@ -1,7 +1,7 @@
-<?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.mastfrog</groupId>
     <artifactId>trackerapi</artifactId>
     <parent>
         <groupId>com.mastfrog</groupId>
@@ -19,22 +19,18 @@
         <dependency>
             <groupId>com.mastfrog</groupId>
             <artifactId>acteur-mongo</artifactId>
-            <type>jar</type>
         </dependency>
         <dependency>
-            <type>jar</type>
             <groupId>com.mastfrog</groupId>
             <artifactId>jackson</artifactId>
         </dependency>
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.javassist</groupId>
@@ -43,7 +39,6 @@
         <dependency>
             <groupId>com.mastfrog</groupId>
             <artifactId>numble</artifactId>
-            <type>jar</type>
         </dependency>
     </dependencies>
     <build>
