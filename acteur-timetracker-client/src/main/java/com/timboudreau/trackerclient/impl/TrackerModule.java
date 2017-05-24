@@ -32,7 +32,7 @@ public class TrackerModule extends AbstractModule {
     protected void configure() {
         install(new WebApiModule<TrackerAPI>(TrackerAPI.class));
         URL u = URL.parse(url);
-        bind(HttpClient.class).toInstance(HttpClient.builder().followRedirects().build());
+        bind(HttpClient.class).toInstance(HttpClient.builder().noCompression().followRedirects().build());
         Problems p = u.getProblems();
         if (p != null) {
             p.throwIfFatalPresent("Bad URL " + u + ": ");
