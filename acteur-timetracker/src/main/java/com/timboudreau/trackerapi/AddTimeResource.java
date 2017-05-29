@@ -105,7 +105,7 @@ final class AddTimeResource extends Acteur {
             return;
         }
         // Write it to the database
-        coll.insert(toWrite, WriteConcern.SAFE);
+        coll.insert(toWrite, WriteConcern.MAJORITY);
         // Add a few headers and return a result
         Map<String, Object> m = toWrite.toMap();
         ObjectId id = (ObjectId) m.get(_id);
