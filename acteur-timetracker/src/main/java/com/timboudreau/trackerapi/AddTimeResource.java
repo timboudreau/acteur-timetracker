@@ -29,6 +29,8 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.Interval;
 import static com.timboudreau.trackerapi.Properties.*;
+import static com.timboudreau.trackerapi.RecordTimeConnectionIsOpenResource.XLI;
+import static com.timboudreau.trackerapi.RecordTimeConnectionIsOpenResource.XTI;
 import static com.timboudreau.trackerapi.RecordTimeConnectionIsOpenResource.buildQueryFromURLParameters;
 import com.timboudreau.trackerapi.support.AuthorizedChecker;
 
@@ -110,9 +112,9 @@ final class AddTimeResource extends Acteur {
         Map<String, Object> m = toWrite.toMap();
         ObjectId id = (ObjectId) m.get(_id);
         if (id != null) {
-            add(Headers.stringHeader("X-Tracker-ID"), id.toString());
+            add(XTI, id.toString());
             if (evt.getParameter(Properties.localId) != null) {
-                add(Headers.stringHeader("X-Local-ID"), evt.getParameter(Properties.localId));
+                add(XLI, evt.getParameter(Properties.localId));
             }
         }
         setState(new RespondWith(HttpResponseStatus.ACCEPTED, m));

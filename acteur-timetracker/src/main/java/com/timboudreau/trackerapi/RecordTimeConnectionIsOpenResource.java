@@ -10,6 +10,7 @@ import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.annotations.Precursors;
 import com.mastfrog.acteur.errors.Err;
+import com.mastfrog.acteur.headers.HeaderValueType;
 import com.mastfrog.acteur.headers.Headers;
 import static com.mastfrog.acteur.headers.Method.PUT;
 import com.mastfrog.acteur.preconditions.Authenticated;
@@ -36,6 +37,7 @@ import org.bson.types.ObjectId;
 import org.joda.time.DateTime;
 import static com.timboudreau.trackerapi.Properties.*;
 import com.timboudreau.trackerapi.support.AuthorizedChecker;
+import io.netty.util.AsciiString;
 import java.util.Arrays;
 
 /**
@@ -54,6 +56,13 @@ final class RecordTimeConnectionIsOpenResource extends Acteur implements Channel
     private final BasicDBObject toWrite = new BasicDBObject(type, time);
     private final long created = DateTime.now().getMillis();
     private final AtomicBoolean isRunning = new AtomicBoolean(true);
+    public static final HeaderValueType<CharSequence> RS
+            = Headers.header(AsciiString.of("X-Remote_Start"));
+    public static final HeaderValueType<CharSequence> XTI
+            = Headers.header(AsciiString.of("X-Tracker-ID"));
+    public static final HeaderValueType<CharSequence> XLI
+            = Headers.header(AsciiString.of("X-Local-ID"));
+    
 
     @Inject
     RecordTimeConnectionIsOpenResource(@Named("periodicLiveWrites") final boolean pings, final HttpEvent evt, final Provider<DBCollection> coll, TTUser user, Application application, final Provider<LiveWriter> writer, Closables clos) {
@@ -69,17 +78,17 @@ final class RecordTimeConnectionIsOpenResource extends Acteur implements Channel
             return;
         }
         add(Headers.CONTENT_LENGTH, 3600000L);
-        add(Headers.stringHeader("X-Remote-Start"), created + "");
-        add(Headers.stringHeader("X-Accel-Buffering"), "no");
+        add(Headers.header("X-Remote-Start"), created + "");
+        add(Headers.X_ACCEL_BUFFERING, false);
         add(Headers.DATE, new DateTime(created));
         setChunked(false);
         setState(new RespondWith(HttpResponseStatus.ACCEPTED));
         setResponseBodyWriter(this);
         coll.get().insert(toWrite, WriteConcern.FSYNC_SAFE);
         ObjectId id = (ObjectId) toWrite.get(_id);
-        add(Headers.stringHeader("X-Tracker-ID"), id.toStringMongod());
+        add(XTI, id.toStringMongod());
         if (evt.getParameter(Properties.localId) != null) {
-            add(Headers.stringHeader("X-Local-ID"), evt.getParameter(localId));
+            add(XLI, evt.getParameter(localId));
         }
 
         final AtomicBoolean done = new AtomicBoolean();

@@ -37,7 +37,7 @@ public class SharesWithMeResource extends Acteur {
 
     @Inject
     SharesWithMeResource(TTUser user, @Named(Timetracker.USER_COLLECTION) DBCollection coll) throws IOException {
-        add(Headers.stringHeader("UserID"), user.id().toString());
+        add(Headers.header("UserID"), user.id().toString());
         BasicDBObject projection = new BasicDBObject(Properties._id, 1).append(name, 1).append(displayName, 1);
         DBCursor cursor = coll.find(new BasicDBObject(authorizes, user.id()), projection);
         if (cursor == null) {
