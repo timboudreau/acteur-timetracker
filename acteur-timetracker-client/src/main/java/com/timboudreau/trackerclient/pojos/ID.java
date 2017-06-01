@@ -2,6 +2,8 @@ package com.timboudreau.trackerclient.pojos;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.mastfrog.util.Checks;
 
 /**
@@ -9,7 +11,7 @@ import com.mastfrog.util.Checks;
  * @author Tim Boudreau
  */
 public class ID implements Comparable<Object> {
-    @JsonProperty("name")
+
     public final String name;
 
     @JsonCreator
@@ -22,26 +24,29 @@ public class ID implements Comparable<Object> {
     public String toString() {
         return name;
     }
-    
+
     public boolean is(ID other) {
         return name.equals(other.name);
     }
-    
+
+    @JsonValue
     public String id() {
         return name;
     }
-    
+
     public boolean equals(Object o) {
         return o != null && o.getClass() == getClass() && ((ID) o).name.equals(name);
     }
-    
+
     public int hashCode() {
         return (getClass().getName() + name).hashCode();
     }
 
     @Override
     public int compareTo(Object t) {
-        if (t == null) t = "null";
+        if (t == null) {
+            t = "null";
+        }
         return toString().compareToIgnoreCase(t.toString());
     }
 }

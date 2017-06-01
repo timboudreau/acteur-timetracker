@@ -18,6 +18,7 @@ import com.mastfrog.acteur.preconditions.MinimumRequestBodyLength;
 import com.mastfrog.acteur.preconditions.PathRegex;
 import com.mastfrog.acteur.preconditions.RequiredUrlParameters;
 import com.mastfrog.acteur.util.PasswordHasher;
+import com.mastfrog.util.time.TimeUtil;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
@@ -26,11 +27,11 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import org.bson.types.ObjectId;
-import org.joda.time.DateTime;
 import static com.timboudreau.trackerapi.Properties.*;
 import static com.timboudreau.trackerapi.SignUpResource.MAX_USERNAME_LENGTH;
 import static com.timboudreau.trackerapi.SignUpResource.MIN_USERNAME_LENGTH;
 import static com.timboudreau.trackerapi.Timetracker.USER_COLLECTION;
+import java.time.ZonedDateTime;
 
 /**
  *
@@ -62,7 +63,7 @@ class SignUpResource extends Acteur {
         }
         DBObject nue = new BasicDBObject(name, new String[]{userName})
                 .append(displayName, evt.getParameter(displayName))
-                .append(created, DateTime.now().getMillis())
+                .append(created, TimeUtil.toUnixTimestamp(ZonedDateTime.now()))
                 .append(version, 0).append(authorizes, new ObjectId[0]);
         String encrypted = crypto.encryptPassword(password);
         nue.put(pass, encrypted);

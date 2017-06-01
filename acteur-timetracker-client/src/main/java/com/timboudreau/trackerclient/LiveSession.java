@@ -1,6 +1,7 @@
 package com.timboudreau.trackerclient;
 
-import org.joda.time.DateTime;
+import java.time.ZonedDateTime;
+
 
 /**
  * Represents a running session that counts time as long as the connection is
@@ -12,7 +13,7 @@ public interface LiveSession {
 
     void end();
 
-    DateTime getRemoteStartTime();
+    ZonedDateTime getRemoteStartTime();
 
     boolean isRunning();
 

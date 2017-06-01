@@ -1,10 +1,13 @@
 package com.timboudreau.trackerapi.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mastfrog.util.time.Interval;
+import com.mastfrog.util.time.MutableInterval;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -12,10 +15,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
-import org.joda.time.Interval;
-import org.joda.time.MutableInterval;
 
 /**
  *
@@ -74,15 +73,15 @@ public final class Intervals implements Iterable<Interval> {
         }
         return m.writeValueAsString(map) + '\n';
     }
-
+    
     private boolean merge(MI i, Interval ival, String id) {
         if (ival.overlaps(i)) {
-            DateTime sa = i.getStart();
-            DateTime ea = i.getEnd();
-            DateTime se = ival.getStart();
-            DateTime ne = ival.getEnd();
-            DateTime a = sa.isBefore(se) ? sa : se;
-            DateTime b = ea.isAfter(ne) ? ea : ne;
+            Instant sa = i.start();
+            Instant ea = i.end();
+            Instant se = ival.start();
+            Instant ne = ival.end();
+            Instant a = sa.isBefore(se) ? sa : se;
+            Instant b = ea.isAfter(ne) ? ea : ne;
             i.setStart(a);
             i.setEnd(b);
             i.ids.add(id);
@@ -99,7 +98,9 @@ public final class Intervals implements Iterable<Interval> {
             }
         }
         value.add(new MI(ival.toMutableInterval(), id));
-        Collections.sort(value, new C());
+        Collections.sort(value, (a, b) -> {
+            return a.start().compareTo(b.start());
+        });
     }
 
     public Duration total() {
@@ -107,7 +108,7 @@ public final class Intervals implements Iterable<Interval> {
         for (MI i : value) {
             result += i.toDurationMillis();
         }
-        return new Duration(result);
+        return Duration.ofMillis(result);
     }
 
     @Override
@@ -155,24 +156,6 @@ public final class Intervals implements Iterable<Interval> {
         @Override
         public void remove() {
             throw new UnsupportedOperationException();
-        }
-    }
-
-    static final class C<Object> implements Comparator<Object> {
-
-        private Interval toInterval(Object o) {
-            if (o instanceof Interval) {
-                return (Interval) o;
-            }
-            if (o instanceof MutableInterval) {
-                return ((MutableInterval) o).toInterval();
-            }
-            return (Interval) o; //will fail
-        }
-
-        @Override
-        public int compare(Object t, Object t1) {
-            return toInterval(t).getStart().compareTo(toInterval(t1).getStart());
         }
     }
 

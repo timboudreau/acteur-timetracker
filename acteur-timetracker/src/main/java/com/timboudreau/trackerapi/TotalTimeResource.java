@@ -10,6 +10,7 @@ import com.mastfrog.acteur.preconditions.BannedUrlParameters;
 import com.mastfrog.acteur.preconditions.BasicAuth;
 import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.PathRegex;
+import com.mastfrog.util.time.Interval;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
@@ -17,7 +18,6 @@ import com.mongodb.DBObject;
 import com.timboudreau.trackerapi.support.CreateCollectionPolicy;
 import com.timboudreau.trackerapi.support.TimeCollectionFinder;
 import java.io.IOException;
-import org.joda.time.Interval;
 import static com.timboudreau.trackerapi.Properties.*;
 import static com.timboudreau.trackerapi.TotalTimeResource.PAT;
 import com.timboudreau.trackerapi.support.AuthorizedChecker;
@@ -56,7 +56,7 @@ final class TotalTimeResource extends Acteur {
                 DBObject ob = cur.next();
                 Long startTime = (Long) ob.get(start);
                 Long endTime = (Long) ob.get(end);
-                ivals.add(new Interval(startTime, endTime), "" + ob.get(Properties._id));
+                ivals.add(Interval.create(startTime, endTime), "" + ob.get(Properties._id));
             }
         }
         ok(ivals.toJSON(detail, summary));

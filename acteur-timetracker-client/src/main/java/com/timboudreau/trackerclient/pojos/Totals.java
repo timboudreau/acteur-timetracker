@@ -2,7 +2,7 @@ package com.timboudreau.trackerclient.pojos;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.joda.time.Duration;
+import java.time.Duration;
 
 /**
  *

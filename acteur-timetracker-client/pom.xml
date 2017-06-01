@@ -30,6 +30,9 @@
                     <perCoreThreadCount>1</perCoreThreadCount>
                     <threadCount>1</threadCount>
                     <reuseForks>false</reuseForks>
+                    <enableAssertions>true</enableAssertions>
+                    <trimStackTrace>false</trimStackTrace>
+                    <detail>true</detail>
                     <systemPropertyVariables>
                         <databaseSchema>MY_TEST_SCHEMA_${surefire.forkNumber}</databaseSchema>
                     </systemPropertyVariables>
@@ -63,10 +66,6 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-joda</artifactId>
         </dependency>
         <dependency>
             <artifactId>jackson-core</artifactId>

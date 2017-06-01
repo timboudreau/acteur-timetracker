@@ -4,20 +4,21 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.google.common.collect.Maps;
+import com.mastfrog.util.Strings;
+import com.mastfrog.util.time.Interval;
+import com.mastfrog.util.time.MutableInterval;
+import com.mastfrog.util.time.ReadableInterval;
+import com.mastfrog.util.time.TimeUtil;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.chrono.ChronoZonedDateTime;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.joda.time.Chronology;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
-import org.joda.time.Interval;
-import org.joda.time.MutableInterval;
-import org.joda.time.Period;
-import org.joda.time.PeriodType;
-import org.joda.time.ReadableDuration;
-import org.joda.time.ReadableInstant;
-import org.joda.time.ReadableInterval;
-import org.joda.time.ReadablePeriod;
+import java.util.Objects;
 
 /**
  *
@@ -25,29 +26,30 @@ import org.joda.time.ReadablePeriod;
  */
 public final class Event implements ReadableInterval {
 
+    @JsonIgnore
     public final Interval interval;
     public final EventID id;
     @JsonIgnore
     public final Duration duration;
-    public final DateTime created;
+    public final ZonedDateTime created;
     public final OtherID createdBy;
-    private final DateTime added;
+    public final ZonedDateTime added;
     public final int version;
     public final String type;
     public Map<String, Object> metadata = new LinkedHashMap<>();
     public final String[] tags;
     public final EventID[] ids;
-    public final DateTime start;
-    public final DateTime end;
+    public final ZonedDateTime start;
+    public final ZonedDateTime end;
     public final boolean running;
 
     @JsonCreator
-    public Event(@JsonProperty("start") long start,
-            @JsonProperty("end") long end,
+    public Event(@JsonProperty("start") ZonedDateTime start,
+            @JsonProperty("end") ZonedDateTime end,
             @JsonProperty(value="_id", required=false) EventID id,
-            @JsonProperty(value ="created", required=false) DateTime created,
+            @JsonProperty(value ="created", required=false) ZonedDateTime created,
             @JsonProperty(value="by", required=false) OtherID createdBy,
-            @JsonProperty(value = "added") DateTime added,
+            @JsonProperty(value = "added") ZonedDateTime added,
             @JsonProperty(value = "version", required = false) int version,
             @JsonProperty(value = "dur", required = false) Duration duration,
             @JsonProperty(value = "type", required = false) String type,
@@ -55,11 +57,12 @@ public final class Event implements ReadableInterval {
             @JsonProperty(value = "tags", required = false) String[] tags,
             @JsonProperty(value = "running", required = false) Boolean running,
             @JsonProperty(value = "ids", required=false) EventID[] ids) {
-        this.interval = new Interval(start, end);
+        this.interval = Interval.create(start, end);
         this.id = id;
         this.ids = ids == null ? id == null ? new EventID[0] : new EventID[]{id} : ids;
-        this.start = new DateTime(start);
-        this.end = new DateTime(end);
+        assert !start.equals(end);
+        this.start = start;
+        this.end = end;
         this.created = created;
         this.createdBy = createdBy;
         this.running = running == null ? false : running;
@@ -70,6 +73,7 @@ public final class Event implements ReadableInterval {
         if (metadata != null) {
             this.metadata.putAll(metadata);
         }
+        System.out.println("MEATDATA IS: " + metadata);
         this.tags = tags == null ? new String[0] : tags;
     }
 
@@ -79,9 +83,9 @@ public final class Event implements ReadableInterval {
     }
 
     public Event shift(Duration dur) {
-        Interval nue = new Interval(interval.getStartMillis() + dur.getMillis(),
-                interval.getEndMillis() + dur.getMillis());
-        return new Event(nue.getStartMillis(), nue.getEndMillis(), id,
+        Interval nue = Interval.create(interval.getStartMillis() + dur.toMillis(),
+                interval.getEndMillis() + dur.toMillis());
+        return new Event(nue.startTime(), nue.endTime(), id,
                 created, createdBy, added, version + 1, nue.toDuration(), type,
                 Maps.newHashMap(metadata), tags.clone(), running, ids);
     }
@@ -106,15 +110,11 @@ public final class Event implements ReadableInterval {
         return this.interval.abuts(interval);
     }
 
-    public Interval withChronology(Chronology chronology) {
-        return interval.withChronology(chronology);
-    }
-
     public Interval withStartMillis(long startInstant) {
         return interval.withStartMillis(startInstant);
     }
 
-    public Interval withStart(ReadableInstant start) {
+    public Interval withStart(Instant start) {
         return interval.withStart(start);
     }
 
@@ -122,28 +122,8 @@ public final class Event implements ReadableInterval {
         return interval.withEndMillis(endInstant);
     }
 
-    public Interval withEnd(ReadableInstant end) {
+    public Interval withEnd(Instant end) {
         return interval.withEnd(end);
-    }
-
-    public Interval withDurationAfterStart(ReadableDuration duration) {
-        return interval.withDurationAfterStart(duration);
-    }
-
-    public Interval withDurationBeforeEnd(ReadableDuration duration) {
-        return interval.withDurationBeforeEnd(duration);
-    }
-
-    public Interval withPeriodAfterStart(ReadablePeriod period) {
-        return interval.withPeriodAfterStart(period);
-    }
-
-    public Interval withPeriodBeforeEnd(ReadablePeriod period) {
-        return interval.withPeriodBeforeEnd(period);
-    }
-
-    public Chronology getChronology() {
-        return interval.getChronology();
     }
 
     @Override
@@ -151,7 +131,7 @@ public final class Event implements ReadableInterval {
         return "Event{" + "interval=" + interval + ", id=" + id + ", duration=" 
                 + duration + ", created=" + created + ", createdBy=" + createdBy 
                 + ", added=" + added + ", version=" + version + ", type=" 
-                + type + ", metadata=" + metadata + ", tags=" + tags + '}';
+                + type + ", metadata=" + metadata + ", tags=" + Strings.join(',', tags) + '}';
     }
 
     public long getStartMillis() {
@@ -171,17 +151,17 @@ public final class Event implements ReadableInterval {
     }
 
     @Override
-    public DateTime getStart() {
-        return interval.getStart();
+    public ZonedDateTime startTime() {
+        return interval.startTime();
     }
 
     @Override
-    public DateTime getEnd() {
-        return interval.getEnd();
+    public ZonedDateTime endTime() {
+        return interval.endTime();
     }
 
     @Override
-    public boolean contains(ReadableInstant instant) {
+    public boolean contains(Instant instant) {
         return interval.contains(instant);
     }
 
@@ -196,17 +176,17 @@ public final class Event implements ReadableInterval {
     }
 
     @Override
-    public boolean isAfter(ReadableInstant instant) {
+    public boolean isAfter(Instant instant) {
         return interval.isAfter(instant);
     }
 
     @Override
     public boolean isAfter(ReadableInterval interval) {
-        return this.interval.isAfter(created);
+        return this.interval.isAfter(interval);
     }
 
     @Override
-    public boolean isBefore(ReadableInstant instant) {
+    public boolean isBefore(Instant instant) {
         return interval.isBefore(instant);
     }
 
@@ -219,14 +199,104 @@ public final class Event implements ReadableInterval {
     public MutableInterval toMutableInterval() {
         return this.interval.toMutableInterval();
     }
-
+    
     @Override
-    public Period toPeriod() {
-        return interval.toPeriod();
+    public Instant end() {
+        return interval.end();
     }
 
     @Override
-    public Period toPeriod(PeriodType type) {
-        return interval.toPeriod(type);
+    public boolean isEmpty() {
+        return interval.isEmpty();
     }
+
+    @Override
+    public boolean overlaps(ChronoZonedDateTime when) {
+        return interval.overlaps(when);
+    }
+
+    @Override
+    public boolean overlaps(Instant instant) {
+        return interval.overlaps(instant);
+    }
+
+    @Override
+    public Instant start() {
+        return interval.start();
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 79 * hash + Objects.hashCode(this.id);
+        hash = 79 * hash + Objects.hashCode(this.duration.toMillis());
+        hash = 79 * hash + Objects.hashCode(this.created.toInstant());
+        hash = 79 * hash + Objects.hashCode(this.createdBy);
+        hash = 79 * hash + Objects.hashCode(this.added.toInstant());
+        hash = 79 * hash + this.version;
+        hash = 79 * hash + Objects.hashCode(this.type);
+        hash = 79 * hash + Objects.hashCode(this.metadata);
+        hash = 79 * hash + Arrays.deepHashCode(this.tags);
+        hash = 79 * hash + Arrays.deepHashCode(this.ids);
+        hash = 79 * hash + Objects.hashCode(this.start);
+        hash = 79 * hash + Objects.hashCode(this.end);
+        hash = 79 * hash + (this.running ? 1 : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Event other = (Event) obj;
+        if (this.version != other.version) {
+            return false;
+        }
+        if (this.running != other.running) {
+            return false;
+        }
+        if (!Objects.equals(this.type, other.type)) {
+            return false;
+        }
+        if (!Objects.equals(this.id, other.id)) {
+            return false;
+        }
+        if (!Objects.equals(this.duration, other.duration)) {
+            return false;
+        }
+        if (!Objects.equals(this.created.toInstant(), other.created.toInstant())) {
+            return false;
+        }
+        if (!Objects.equals(this.createdBy, other.createdBy)) {
+            return false;
+        }
+        if (!Objects.equals(this.added == null ? null : this.added.toInstant(), other.added == null ? null : other.added.toInstant())) {
+            return false;
+        }
+        if (!Objects.equals(this.metadata, other.metadata)) {
+            return false;
+        }
+        if (!Arrays.deepEquals(this.tags, other.tags)) {
+            return false;
+        }
+        if (!Arrays.deepEquals(this.ids, other.ids)) {
+            return false;
+        }
+        if (!Objects.equals(this.start, other.start)) {
+            return false;
+        }
+        if (!Objects.equals(this.end, other.end)) {
+            return false;
+        }
+        return true;
+    }
+    
+    
 }

@@ -6,14 +6,11 @@ import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.name.Named;
 import com.mastfrog.acteur.Acteur;
-import com.timboudreau.trackerapi.support.CreateCollectionPolicy;
-import com.timboudreau.trackerapi.support.TTUser;
 import com.mastfrog.giulius.annotations.Defaults;
 import com.mastfrog.giulius.annotations.Namespace;
 import com.mastfrog.acteur.Event;
 import com.mastfrog.acteur.Help;
 import com.mastfrog.acteur.HttpEvent;
-import com.mastfrog.acteur.ImplicitBindings;
 import com.mastfrog.acteur.Page;
 import com.mastfrog.acteur.Response;
 import com.mastfrog.acteur.annotations.GenericApplication;
@@ -26,12 +23,15 @@ import com.mastfrog.acteur.util.CacheControl;
 import com.mastfrog.acteur.util.PasswordHasher;
 import com.mastfrog.acteur.util.Server;
 import com.mastfrog.acteur.util.ServerControl;
+import com.mastfrog.jackson.DurationSerializationMode;
 import com.mastfrog.jackson.JacksonModule;
+import com.mastfrog.jackson.TimeSerializationMode;
 import com.mastfrog.settings.Settings;
 import com.mastfrog.settings.SettingsBuilder;
 import com.mastfrog.url.Path;
 import com.mastfrog.util.Exceptions;
 import com.mastfrog.util.Streams;
+import com.mastfrog.util.time.Interval;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
@@ -44,7 +44,6 @@ import static com.timboudreau.trackerapi.Properties.pass;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import java.io.IOException;
 import java.io.InputStream;
-import org.joda.time.Interval;
 
 /**
  * The Timetracker main class
@@ -88,7 +87,8 @@ public class Timetracker extends GenericApplication {
         // Set up the Guice injector with our settings and modules.  Dependencies
         // will bind our settings as @Named
         Server server = new ServerBuilder()
-                .add(new JacksonModule())
+                .add(new JacksonModule().withJavaTimeSerializationMode(TimeSerializationMode.TIME_AS_EPOCH_MILLIS,
+                            DurationSerializationMode.DURATION_AS_MILLIS))
                 .add(new ResetPasswordModule())
                 .withType(Interval.class, 
                         DBCursor.class, 

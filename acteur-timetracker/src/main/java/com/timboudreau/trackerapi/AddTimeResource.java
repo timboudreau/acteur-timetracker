@@ -6,7 +6,6 @@ import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.annotations.Precursors;
 import com.mastfrog.acteur.errors.Err;
-import com.mastfrog.acteur.headers.Headers;
 import static com.mastfrog.acteur.headers.Method.PUT;
 import com.mastfrog.acteur.preconditions.Authenticated;
 import com.mastfrog.acteur.preconditions.BannedUrlParameters;
@@ -14,6 +13,7 @@ import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.PathRegex;
 import com.mastfrog.acteur.preconditions.RequiredUrlParameters;
+import com.mastfrog.util.time.Interval;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.WriteConcern;
@@ -25,14 +25,14 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import java.io.IOException;
 import java.util.Map;
 import org.bson.types.ObjectId;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
-import org.joda.time.Interval;
 import static com.timboudreau.trackerapi.Properties.*;
 import static com.timboudreau.trackerapi.RecordTimeConnectionIsOpenResource.XLI;
 import static com.timboudreau.trackerapi.RecordTimeConnectionIsOpenResource.XTI;
 import static com.timboudreau.trackerapi.RecordTimeConnectionIsOpenResource.buildQueryFromURLParameters;
 import com.timboudreau.trackerapi.support.AuthorizedChecker;
+import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
+import java.time.Duration;
+import java.time.Instant;
 
 /**
  * Adds a time entry
@@ -59,10 +59,10 @@ final class AddTimeResource extends Acteur {
         CheckParameters(HttpEvent evt) {
             try {
                 // Get the start and end parameters and check them for validity
-                DateTime startTime = new DateTime(evt.getLongParameter(start).get());
-                DateTime endTime = new DateTime(evt.getLongParameter(end).get());
-                DateTime now = DateTime.now();
-                DateTime twentyYearsAgo = now.minus(Duration.standardDays(365 * 20));
+                Instant startTime = Instant.ofEpochMilli(evt.getLongParameter(start).get());
+                Instant endTime = Instant.ofEpochMilli(evt.getLongParameter(end).get());
+                Instant now = Instant.now();
+                Instant twentyYearsAgo = now.minus(Duration.ofDays(365 * 20));
                 // We're not building an api for world history here
                 if (twentyYearsAgo.isAfter(startTime)) {
                     setState(new RespondWith(Err.badRequest(
@@ -76,7 +76,11 @@ final class AddTimeResource extends Acteur {
                 }
                 // Create an Interval which will be injected into the AddTimeResource
                 // constructor
-                Interval interval = new Interval(startTime, endTime);
+                if (startTime.equals(endTime)) {
+                    reply(BAD_REQUEST, "Zero length event");
+                    return;
+                }
+                Interval interval = Interval.create(startTime, endTime);
                 next(interval);
             } catch (NumberFormatException e) {
                 reply(Err.badRequest("Start or end is not a number: '" + evt.getParameter(start) + "' and '" + evt.getParameter(end)));
@@ -90,14 +94,17 @@ final class AddTimeResource extends Acteur {
         // We have validated values
         long startVal = interval.getStartMillis();
         long endVal = interval.getEndMillis();
+        assert endVal != startVal;
         // The entity we will write to the database
         BasicDBObject toWrite = new BasicDBObject(type, time)
                 .append(start, startVal)
                 .append(end, endVal)
                 .append(duration, endVal - startVal)
-                .append(added, DateTime.now().getMillis())
+                .append(added, Instant.now().toEpochMilli())
                 .append(by, user.idAsString())
                 .append(version, 0);
+        
+        System.out.println("WILL WRITE " + toWrite);
 
         // Add the other URL properties to the BasicDBObject, returning an
         // error message if something goes wrong
@@ -117,6 +124,7 @@ final class AddTimeResource extends Acteur {
                 add(XLI, evt.getParameter(Properties.localId));
             }
         }
+        System.out.println("MAP VERSION: " + m);
         setState(new RespondWith(HttpResponseStatus.ACCEPTED, m));
     }
 }

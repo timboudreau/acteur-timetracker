@@ -33,7 +33,6 @@ import com.timboudreau.trackerapi.support.TTUser;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import java.io.IOException;
 import java.net.URLDecoder;
-import org.joda.time.DateTimeUtils;
 
 /**
  * Change a user's display name
@@ -75,7 +74,7 @@ public class EditUserResource extends Acteur {
         DBObject query = coll.findOne(new BasicDBObject(name, userName));
 
         DBObject update = new BasicDBObject("$set", new BasicDBObject(displayName, dn)
-                .append(lastModified, DateTimeUtils.currentTimeMillis())).append("$inc",
+                .append(lastModified, System.currentTimeMillis())).append("$inc",
                         new BasicDBObject(Properties.version, 1));
 
         WriteResult res = coll.update(query, update, false, false, WriteConcern.FSYNCED);

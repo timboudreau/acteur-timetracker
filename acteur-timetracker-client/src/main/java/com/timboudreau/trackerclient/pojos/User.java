@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.joda.time.DateTime;
+import java.time.ZonedDateTime;
 
 /**
  *
@@ -15,19 +15,19 @@ public final class User {
 
     public final String[] names;
     public final String displayName;
-    public final DateTime created;
+    public final ZonedDateTime created;
     public final int version;
     public final OtherID[] authorizes;
-    public final DateTime lastModified;
+    public final ZonedDateTime lastModified;
     public final UserID _id;
 
     @JsonCreator
     public User(@JsonProperty("name") String[] names,
             @JsonProperty("displayName") String displayName,
-            @JsonProperty("created") DateTime created,
+            @JsonProperty("created") ZonedDateTime created,
             @JsonProperty("version") int version,
             @JsonProperty("authorizes") OtherID[] authorizes,
-            @JsonProperty("lastModified") DateTime lastModified,
+            @JsonProperty("lastModified") ZonedDateTime lastModified,
             @JsonProperty("_id") UserID _id) {
         this.names = names;
         this.displayName = displayName;

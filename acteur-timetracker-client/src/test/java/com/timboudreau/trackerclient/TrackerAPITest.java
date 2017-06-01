@@ -7,7 +7,12 @@ import com.mastfrog.giulius.Dependencies;
 import com.mastfrog.giulius.tests.GuiceRunner;
 import com.mastfrog.giulius.tests.TestWith;
 import com.mastfrog.netty.http.client.ResponseFuture;
+import com.mastfrog.netty.http.client.State;
+import com.mastfrog.netty.http.client.State.FullContentReceived;
 import com.mastfrog.util.Streams;
+import com.mastfrog.util.thread.Receiver;
+import com.mastfrog.util.time.Interval;
+import com.mastfrog.util.time.TimeUtil;
 import com.mastfrog.webapi.Callback;
 import com.mastfrog.webapi.builtin.Parameters;
 import com.mongodb.DB;
@@ -22,14 +27,18 @@ import com.timboudreau.trackerclient.pojos.User;
 import com.timboudreau.trackerclient.pojos.UserID;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
+import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.util.CharsetUtil;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
-import org.joda.time.Interval;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.After;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -63,7 +72,7 @@ public class TrackerAPITest {
                 new TrackerModule("http://localhost:" + port)).build();
         spi = deps.getInstance(TrackerClientSPI.class);
     }
-    
+
     @After
     public void shutdown() throws InterruptedException {
         if (ctrl != null) {
@@ -93,9 +102,9 @@ public class TrackerAPITest {
 //        Thread.sleep(3000);
 //        assertEquals(CREATED, hu.status);
 
-        final long now = System.currentTimeMillis();
-        Duration length = Duration.standardSeconds(60);
-        final long then = now + length.getMillis();
+        final long now = TimeUtil.toUnixTimestamp(ZonedDateTime.now().with(ChronoField.SECOND_OF_MINUTE, 0).with(ChronoField.MILLI_OF_SECOND, 0));
+        Duration length = Duration.ofSeconds(60);
+        final long then = now + length.toMillis();
 
         final long before = now - 1;
         final long after = then + 1;
@@ -109,17 +118,34 @@ public class TrackerAPITest {
 
         H<Event> addH = new H<>(Event.class);
         Event addedEvent;
-        fut = addH.future = sess.addEvent(new Interval(now, then), addH,
+        fut = addH.future = sess.addEvent(Interval.create(now, then), addH,
                 new SeriesID("stuff"), Parameters.create("foo", "bar"));
-        
+
+        final AtomicReference<CharSequence> str = new AtomicReference<>();
+
+        fut.on(State.FullContentReceived.class, new Receiver<ByteBuf>() {
+            @Override
+            public void receive(ByteBuf object) {
+                str.set(object.readCharSequence(object.readableBytes(), CharsetUtil.UTF_8));
+            }
+        });
+
         addedEvent = addH.await();
         assertNotNull(addedEvent);
+
+        CharSequence body = str.get();
+        System.out.println("\nBODY IS \n\n" + body + "\n\n");
 
         Event[] queryResults;
         H<Event[]> evtH;
 
-        assertEquals(now, addedEvent.getStart().getMillis());
-        assertEquals(now + length.getMillis(), addedEvent.getEnd().getMillis());
+        assertEquals(length, addedEvent.duration);
+        assertNotEquals("Start field is equal to end field - parsing problem?", addedEvent.start.toInstant().toEpochMilli(), addedEvent.end.toInstant().toEpochMilli());
+        assertNotEquals("Start is equal to end - parsing problem?", addedEvent.start().toEpochMilli(), addedEvent.end().toEpochMilli());
+        assertEquals(now, addedEvent.start().toEpochMilli());
+        assertEquals("Got " + addedEvent + " difference is " + ((now + length.toMillis()) - addedEvent.end().toEpochMilli()),
+                now + length.toMillis(), addedEvent.end().toEpochMilli());
+
         assertEquals("bar", addedEvent.metadata.get("foo"));
 
         addS = new H<>(SeriesID[].class);
@@ -129,55 +155,55 @@ public class TrackerAPITest {
         assertEquals(series, allSeries[0]);
 
         // These queries should all get our added event as the single result
-        evtH = getEvents(series, EventQuery.create().startsBeforeOrAt(new DateTime(now)), new H<>(Event[].class));
+        evtH = getEvents(series, EventQuery.create().startsBeforeOrAt(TimeUtil.fromUnixTimestamp(now)), new H<>(Event[].class));
         queryResults = evtH.await();
         assertNotNull(queryResults);
         assertEquals(1, queryResults.length);
         assertEquals(now, queryResults[0].interval.getStartMillis());
 
-        evtH = getEvents(series, EventQuery.create().startsAt(new DateTime(now)), new H<>(Event[].class));
+        evtH = getEvents(series, EventQuery.create().startsAt(TimeUtil.fromUnixTimestamp(now)), new H<>(Event[].class));
         queryResults = evtH.await();
         assertNotNull(queryResults);
         assertEquals(1, queryResults.length);
         assertEquals(now, queryResults[0].interval.getStartMillis());
 
-        evtH = getEvents(series, EventQuery.create().startsAtOrAfter(new DateTime(now)), new H<>(Event[].class));
+        evtH = getEvents(series, EventQuery.create().startsAtOrAfter(TimeUtil.fromUnixTimestamp(now)), new H<>(Event[].class));
         queryResults = evtH.await();
         assertNotNull(queryResults);
         assertEquals(1, queryResults.length);
         assertEquals(now, queryResults[0].interval.getStartMillis());
 
-        evtH = getEvents(series, EventQuery.create().endsAt(new DateTime(then)), new H<>(Event[].class));
+        evtH = getEvents(series, EventQuery.create().endsAt(TimeUtil.fromUnixTimestamp(then)), new H<>(Event[].class));
         queryResults = evtH.await();
         assertNotNull(queryResults);
         assertEquals(1, queryResults.length);
         assertEquals(now, queryResults[0].interval.getStartMillis());
 
-        evtH = getEvents(series, EventQuery.create().endsAtOrAfter(new DateTime(then)), new H<>(Event[].class));
+        evtH = getEvents(series, EventQuery.create().endsAtOrAfter(TimeUtil.fromUnixTimestamp(then)), new H<>(Event[].class));
         queryResults = evtH.await();
         assertNotNull(queryResults);
         assertEquals(1, queryResults.length);
         assertEquals(now, queryResults[0].interval.getStartMillis());
 
-        evtH = getEvents(series, EventQuery.create().endsBeforeOrAt(new DateTime(then)), new H<>(Event[].class));
+        evtH = getEvents(series, EventQuery.create().endsBeforeOrAt(TimeUtil.fromUnixTimestamp(then)), new H<>(Event[].class));
         queryResults = evtH.await();
         assertNotNull(queryResults);
         assertEquals(1, queryResults.length);
         assertEquals(now, queryResults[0].interval.getStartMillis());
 
-        evtH = getEvents(series, EventQuery.create().lasts(new Duration(then - now)), new H<>(Event[].class));
+        evtH = getEvents(series, EventQuery.create().lasts(Duration.ofMillis(then - now)), new H<>(Event[].class));
         queryResults = evtH.await();
         assertNotNull(queryResults);
         assertEquals(1, queryResults.length);
         assertEquals(now, queryResults[0].interval.getStartMillis());
 
-        evtH = getEvents(series, EventQuery.create().lastsAtLeast(new Duration(then - now)), new H<>(Event[].class));
+        evtH = getEvents(series, EventQuery.create().lastsAtLeast(Duration.ofMillis(then - now)), new H<>(Event[].class));
         queryResults = evtH.await();
         assertNotNull(queryResults);
         assertEquals(1, queryResults.length);
         assertEquals(now, queryResults[0].interval.getStartMillis());
 
-        evtH = getEvents(series, EventQuery.create().lastsLessThan(new Duration((then + 1) - now)), new H<>(Event[].class));
+        evtH = getEvents(series, EventQuery.create().lastsLessThan(Duration.ofMillis((then + 1) - now)), new H<>(Event[].class));
         queryResults = evtH.await();
         assertNotNull(queryResults);
         assertEquals(1, queryResults.length);
@@ -195,42 +221,42 @@ public class TrackerAPITest {
         assertNotNull(queryResults);
         assertEquals(0, queryResults.length);
 
-        evtH = getEvents(series, EventQuery.create().startsAt(new DateTime(now + 1)), new H<>(Event[].class));
+        evtH = getEvents(series, EventQuery.create().startsAt(TimeUtil.fromUnixTimestamp(now + 1)), new H<>(Event[].class));
         queryResults = evtH.await();
         assertNotNull(queryResults);
         assertEquals(0, queryResults.length);
 
-        evtH = getEvents(series, EventQuery.create().startsAtOrAfter(new DateTime(now + 1)), new H<>(Event[].class));
+        evtH = getEvents(series, EventQuery.create().startsAtOrAfter(TimeUtil.fromUnixTimestamp(now + 1)), new H<>(Event[].class));
         queryResults = evtH.await();
         assertNotNull(queryResults);
         assertEquals(0, queryResults.length);
 
-        evtH = getEvents(series, EventQuery.create().endsAt(new DateTime(then - 1)), new H<>(Event[].class));
+        evtH = getEvents(series, EventQuery.create().endsAt(TimeUtil.fromUnixTimestamp(then - 1)), new H<>(Event[].class));
         queryResults = evtH.await();
         assertNotNull(queryResults);
         assertEquals(0, queryResults.length);
 
-        evtH = getEvents(series, EventQuery.create().endsAtOrAfter(new DateTime(then + 1)), new H<>(Event[].class));
+        evtH = getEvents(series, EventQuery.create().endsAtOrAfter(TimeUtil.fromUnixTimestamp(then + 1)), new H<>(Event[].class));
         queryResults = evtH.await();
         assertNotNull(queryResults);
         assertEquals(0, queryResults.length);
 
-        evtH = getEvents(series, EventQuery.create().endsBeforeOrAt(new DateTime(then - 1)), new H<>(Event[].class));
+        evtH = getEvents(series, EventQuery.create().endsBeforeOrAt(TimeUtil.fromUnixTimestamp(then - 1)), new H<>(Event[].class));
         queryResults = evtH.await();
         assertNotNull(queryResults);
         assertEquals(0, queryResults.length);
 
-        evtH = getEvents(series, EventQuery.create().lasts(new Duration(then - now - 1)), new H<>(Event[].class));
+        evtH = getEvents(series, EventQuery.create().lasts(Duration.ofMillis(then - now - 1)), new H<>(Event[].class));
         queryResults = evtH.await();
         assertNotNull(queryResults);
         assertEquals(0, queryResults.length);
 
-        evtH = getEvents(series, EventQuery.create().lastsAtLeast(new Duration((then + 1) - now)), new H<>(Event[].class));
+        evtH = getEvents(series, EventQuery.create().lastsAtLeast(Duration.ofMillis((then + 1) - now)), new H<>(Event[].class));
         queryResults = evtH.await();
         assertNotNull(queryResults);
         assertEquals(0, queryResults.length);
 
-        evtH = getEvents(series, EventQuery.create().lastsLessThan(new Duration(then - (now + 1))), new H<>(Event[].class));
+        evtH = getEvents(series, EventQuery.create().lastsLessThan(Duration.ofMillis(then - (now + 1))), new H<>(Event[].class));
         queryResults = evtH.await();
         assertNotNull(queryResults);
         assertEquals(0, queryResults.length);
@@ -238,6 +264,19 @@ public class TrackerAPITest {
         H<Totals> totalH = new H<>(Totals.class);
         fut = totalH.future = sess.getTotals(series, EventQuery.create().add("foo", "bar"), totalH);
         Totals tot = totalH.await();
+        
+        fut.on(State.FullContentReceived.class, new Receiver<ByteBuf>() {
+            @Override
+            public void receive(ByteBuf object) {
+                str.set(object.readCharSequence(object.readableBytes(), CharsetUtil.UTF_8));
+                object.resetReaderIndex();
+            }
+        });
+        System.out.println("STATUS " + totalH.status);
+        System.out.println("HEADERS " + totalH.resp);
+        System.out.println("VALUE " + totalH.obj);
+        System.out.println("\n\nTOTALS:\n" + str.get() + "\n\n");
+
         assertNotNull(tot);
         assertEquals(length, tot.total);
         assertNotNull(tot.intervals);
@@ -249,12 +288,12 @@ public class TrackerAPITest {
         assertEquals(length, tot.intervals[0].duration);
 
         H<Acknowledgement> evtA = new H<>(Acknowledgement.class);
-        fut = evtA.future = sess.updateTimes(series, new FieldID("food"), EventQuery.create().startsBeforeOrAt(new DateTime(now)), "pizza", evtA);
+        fut = evtA.future = sess.updateTimes(series, new FieldID("food"), EventQuery.create().startsBeforeOrAt(TimeUtil.fromUnixTimestamp(now)), "pizza", evtA);
         Acknowledgement ack = evtA.await();
         assertNotNull(ack);
         assertEquals(1, ack.updated());
 
-        evtH = getEvents(series, EventQuery.create().startsAt(new DateTime(now)), new H<>(Event[].class));
+        evtH = getEvents(series, EventQuery.create().startsAt(TimeUtil.fromUnixTimestamp(now)), new H<>(Event[].class));
         queryResults = evtH.await();
         assertNotNull(queryResults);
         assertEquals(1, queryResults.length);
@@ -262,12 +301,12 @@ public class TrackerAPITest {
         assertEquals("pizza", queryResults[0].getProperty("food"));
 
         evtA = new H<>(Acknowledgement.class);
-        fut = evtA.future = sess.deleteField(series, new FieldID("food"), EventQuery.create().startsBeforeOrAt(new DateTime(now)), evtA);
+        fut = evtA.future = sess.deleteField(series, new FieldID("food"), EventQuery.create().startsBeforeOrAt(TimeUtil.fromUnixTimestamp(now)), evtA);
         ack = evtA.await();
         assertNotNull(ack);
         assertEquals(1, ack.updated());
 
-        evtH = getEvents(series, EventQuery.create().startsAt(new DateTime(now)), new H<>(Event[].class));
+        evtH = getEvents(series, EventQuery.create().startsAt(TimeUtil.fromUnixTimestamp(now)), new H<>(Event[].class));
         queryResults = evtH.await();
         assertNotNull(queryResults);
         assertEquals(1, queryResults.length);
@@ -275,12 +314,12 @@ public class TrackerAPITest {
         assertNull(queryResults[0].getProperty("food"));
 
         evtA = new H<>(Acknowledgement.class);
-        fut = evtA.future = sess.delete(series, EventQuery.create().startsAt(new DateTime(now)), evtA);
+        fut = evtA.future = sess.delete(series, EventQuery.create().startsAt(TimeUtil.fromUnixTimestamp(now)), evtA);
         ack = evtA.await();
         assertNotNull(ack);
         assertEquals(1, ack.updated());
 
-        evtH = getEvents(series, EventQuery.create().startsAt(new DateTime(now)), new H<>(Event[].class));
+        evtH = getEvents(series, EventQuery.create().startsAt(TimeUtil.fromUnixTimestamp(now)), new H<>(Event[].class));
         queryResults = evtH.await();
         assertNotNull(queryResults);
         assertEquals(0, queryResults.length);
@@ -325,7 +364,7 @@ public class TrackerAPITest {
 
         final long WAIT_FOR = 2000;
 
-        DateTime start = liveListener.obj.getRemoteStartTime();
+        ZonedDateTime start = liveListener.obj.getRemoteStartTime();
         System.err.println("Remote start time" + start);
         Thread.sleep(WAIT_FOR);
         ls.end();
@@ -344,7 +383,7 @@ public class TrackerAPITest {
 //        assertEquals("bar", e.getProperty("foo"));
 //        assertEquals("quux", e.getProperty("baz"));
 //        assertFalse(e.running);
-//        assertTrue(e.duration.getMillis() > WAIT_FOR - 500);
+//        assertTrue(e.duration.toMillis() > WAIT_FOR - 500);
     }
 
     static class H<T> extends Callback<T> {
@@ -377,23 +416,24 @@ public class TrackerAPITest {
             status = status;
             error = true;
             if (bytes != null && bytes.isReadable() && bytes.readableBytes() > 0) {
-                try {
-                    System.err.println(Streams.readString(new ByteBufInputStream(bytes)));
-                } catch (IOException | IllegalStateException e) {
-                    e.printStackTrace();
-                }
+                System.err.println(bytes.readCharSequence(bytes.readableBytes(), CharsetUtil.UTF_8));
+                bytes.resetReaderIndex();
             }
             latch.countDown();
         }
 
         public T await() throws InterruptedException {
-            future.await(10, TimeUnit.SECONDS);
+            if (obj != null) {
+                return obj;
+            }
+            future.await(20, TimeUnit.SECONDS);
             latch.await(10, TimeUnit.SECONDS);
             return obj;
         }
 
         @Override
         public void success(T object) {
+            System.out.println("SUCCESS: " + object);
             obj = object;
             count++;
             if (count > 1) {

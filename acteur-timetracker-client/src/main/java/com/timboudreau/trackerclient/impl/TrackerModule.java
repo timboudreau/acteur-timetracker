@@ -3,7 +3,11 @@ package com.timboudreau.trackerclient.impl;
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import com.mastfrog.giulius.Dependencies;
+import com.mastfrog.jackson.DurationSerializationMode;
 import com.mastfrog.jackson.JacksonModule;
+import com.mastfrog.jackson.TimeSerializationMode;
+import com.mastfrog.jackson.DurationSerializationMode;
+import com.mastfrog.jackson.TimeSerializationMode;
 import com.mastfrog.netty.http.client.HttpClient;
 import com.mastfrog.url.URL;
 import com.mastfrog.webapi.WebApiModule;
@@ -39,7 +43,9 @@ public class TrackerModule extends AbstractModule {
         }
         bind(URL.class).toInstance(u);
         bind(String.class).annotatedWith(Names.named("baseUrl")).toInstance(url);
-        install(new JacksonModule());
+        install(new JacksonModule()
+                    .withJavaTimeSerializationMode(TimeSerializationMode.TIME_AS_EPOCH_MILLIS,
+                            DurationSerializationMode.DURATION_AS_MILLIS));
     }
 
     public static TrackerClientSPI create() throws IOException {

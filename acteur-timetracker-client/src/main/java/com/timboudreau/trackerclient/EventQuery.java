@@ -2,15 +2,16 @@ package com.timboudreau.trackerclient;
 
 import com.mastfrog.netty.http.client.HttpRequestBuilder;
 import com.mastfrog.util.Exceptions;
+import com.mastfrog.util.time.TimeUtil;
 import com.timboudreau.trackerclient.pojos.EventID;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
 
 /**
  *
@@ -60,42 +61,42 @@ public final class EventQuery {
         return this;
     }
 
-    public EventQuery startsAt(DateTime start) {
+    public EventQuery startsAt(ZonedDateTime start) {
         terms.add(new Term<>(Properties.start, Relations.EQUAL_TO, start));
         return this;
     }
 
-    public EventQuery startsAtOrAfter(DateTime start) {
+    public EventQuery startsAtOrAfter(ZonedDateTime start) {
         terms.add(new Term<>(Properties.start, Relations.GREATER_THAN_OR_EQUAL, start));
         return this;
     }
 
-    public EventQuery startsBeforeOrAt(DateTime start) {
+    public EventQuery startsBeforeOrAt(ZonedDateTime start) {
         terms.add(new Term<>(Properties.start, Relations.LESS_THAN_OR_EQUAL, start));
         return this;
     }
 
-    public EventQuery endsAt(DateTime start) {
+    public EventQuery endsAt(ZonedDateTime start) {
         terms.add(new Term<>(Properties.end, Relations.EQUAL_TO, start));
         return this;
     }
 
-    public EventQuery endsAfter(DateTime start) {
+    public EventQuery endsAfter(ZonedDateTime start) {
         terms.add(new Term<>(Properties.end, Relations.GREATER_THAN, start));
         return this;
     }
 
-    public EventQuery endsAtOrAfter(DateTime start) {
+    public EventQuery endsAtOrAfter(ZonedDateTime start) {
         terms.add(new Term<>(Properties.end, Relations.GREATER_THAN_OR_EQUAL, start));
         return this;
     }
 
-    public EventQuery endsBeforeOrAt(DateTime start) {
+    public EventQuery endsBeforeOrAt(ZonedDateTime start) {
         terms.add(new Term<>(Properties.end, Relations.LESS_THAN_OR_EQUAL, start));
         return this;
     }
 
-    public EventQuery endsBefore(DateTime start) {
+    public EventQuery endsBefore(ZonedDateTime start) {
         terms.add(new Term<>(Properties.end, Relations.LESS_THAN, start));
         return this;
     }
@@ -164,10 +165,10 @@ public final class EventQuery {
 
         void appendTo(HttpRequestBuilder b) {
             String val;
-            if (term instanceof DateTime) {
-                val = ((DateTime) term).getMillis() + "";
+            if (term instanceof ZonedDateTime) {
+                val = Long.toString(TimeUtil.toUnixTimestamp(((ZonedDateTime) term)));
             } else if (term instanceof Duration) {
-                val = ((Duration) term).getMillis() + "";
+                val = ((Duration) term).toMillis() + "";
             } else {
                 val = term.toString();
             }
@@ -178,10 +179,10 @@ public final class EventQuery {
             try {
                 String n = URLEncoder.encode(name, "UTF-8");
                 String val = term.toString();
-                if (term instanceof DateTime) {
-                    val = ((DateTime) term).getMillis() + "";
+                if (term instanceof ZonedDateTime) {
+                    val = Long.toString(TimeUtil.toUnixTimestamp(((ZonedDateTime) term)));
                 } else if (term instanceof Duration) {
-                    val = ((Duration) term).getMillis() + "";
+                    val = Long.toString(((Duration) term).toMillis());
                 }
                 if (term instanceof EventID) {
                     return n + '=' + URLEncoder.encode(val, "UTF-8");

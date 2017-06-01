@@ -17,6 +17,7 @@ import com.mastfrog.acteur.preconditions.Authenticated;
 import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.Methods;
 import com.mastfrog.acteur.preconditions.PathRegex;
+import com.mastfrog.util.time.TimeUtil;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.WriteConcern;
@@ -34,10 +35,10 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.bson.types.ObjectId;
-import org.joda.time.DateTime;
 import static com.timboudreau.trackerapi.Properties.*;
 import com.timboudreau.trackerapi.support.AuthorizedChecker;
 import io.netty.util.AsciiString;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 
 /**
@@ -54,7 +55,7 @@ import java.util.Arrays;
 final class RecordTimeConnectionIsOpenResource extends Acteur implements ChannelFutureListener {
 
     private final BasicDBObject toWrite = new BasicDBObject(type, time);
-    private final long created = DateTime.now().getMillis();
+    private final long created = TimeUtil.toUnixTimestamp(ZonedDateTime.now());
     private final AtomicBoolean isRunning = new AtomicBoolean(true);
     public static final HeaderValueType<CharSequence> RS
             = Headers.header(AsciiString.of("X-Remote_Start"));
@@ -80,7 +81,7 @@ final class RecordTimeConnectionIsOpenResource extends Acteur implements Channel
         add(Headers.CONTENT_LENGTH, 3600000L);
         add(Headers.header("X-Remote-Start"), created + "");
         add(Headers.X_ACCEL_BUFFERING, false);
-        add(Headers.DATE, new DateTime(created));
+        add(Headers.DATE, TimeUtil.fromUnixTimestamp(created));
         setChunked(false);
         setState(new RespondWith(HttpResponseStatus.ACCEPTED));
         setResponseBodyWriter(this);
@@ -195,7 +196,7 @@ final class RecordTimeConnectionIsOpenResource extends Acteur implements Channel
 
         public Void call() throws Exception {
             if (!done.get()) {
-                long end = DateTime.now().getMillis();
+                long end = TimeUtil.toUnixTimestamp(ZonedDateTime.now());
                 toWrite.append("end", end).append(Properties.duration, end - start).append(Properties.running, running.get());
                 coll.get().save(toWrite, WriteConcern.UNACKNOWLEDGED);
             }

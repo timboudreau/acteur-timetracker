@@ -5,6 +5,7 @@ import static com.mastfrog.acteur.headers.Method.DELETE;
 import static com.mastfrog.acteur.headers.Method.GET;
 import static com.mastfrog.acteur.headers.Method.POST;
 import static com.mastfrog.acteur.headers.Method.PUT;
+import com.mastfrog.util.time.Interval;
 import com.mastfrog.webapi.Interpreter;
 import com.mastfrog.webapi.WebCall;
 import com.mastfrog.webapi.WebCallBuilder;
@@ -23,7 +24,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import java.util.Map;
-import org.joda.time.Interval;
 
 /**
  * The timetracker client web api
@@ -74,7 +74,7 @@ public enum TrackerAPI implements WebCallEnum {
     
     static class EmptyRI extends Interpreter {
         @Override
-        protected <T> T interpret(HttpResponseStatus status, HttpHeaders headers, ByteBuf contents, Class<T> as) throws Exception {
+        public <T> T interpret(HttpResponseStatus status, HttpHeaders headers, ByteBuf contents, Class<T> as) throws Exception {
             return null;
         }
     }

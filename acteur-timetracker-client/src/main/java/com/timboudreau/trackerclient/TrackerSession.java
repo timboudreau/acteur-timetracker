@@ -3,6 +3,7 @@ package com.timboudreau.trackerclient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mastfrog.acteur.util.BasicCredentials;
 import com.mastfrog.netty.http.client.ResponseFuture;
+import com.mastfrog.util.time.Interval;
 import com.mastfrog.webapi.Callback;
 import com.mastfrog.webapi.builtin.Parameters;
 import com.timboudreau.trackerclient.pojos.Acknowledgement;
@@ -15,10 +16,9 @@ import com.timboudreau.trackerclient.pojos.User;
 import com.timboudreau.trackerclient.pojos.UserID;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.Map;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
-import org.joda.time.Interval;
 
 /**
  * Represents a login session for a user with the time tracker api
@@ -91,12 +91,12 @@ public class TrackerSession {
         return spi.call(TrackerAPI.GET_TIMES, handler, query, ser, getUserID(), getCredentials());
     }
 
-    public <T extends Callback<Event>> ResponseFuture addEvent(Duration duration, DateTime end, T handler, SeriesID ser, Parameters params) throws Exception {
-        return addEvent(new Interval(duration, end), handler, ser, params);
+    public <T extends Callback<Event>> ResponseFuture addEvent(Duration duration, ZonedDateTime end, T handler, SeriesID ser, Parameters params) throws Exception {
+        return addEvent(Interval.create(duration, end), handler, ser, params);
     }
 
-    public <T extends Callback<Event>> ResponseFuture addEvent(DateTime start, Duration duration, T handler, SeriesID ser, Parameters params) throws Exception {
-        return addEvent(new Interval(start, duration), handler, ser, params);
+    public <T extends Callback<Event>> ResponseFuture addEvent(ZonedDateTime start, Duration duration, T handler, SeriesID ser, Parameters params) throws Exception {
+        return addEvent(Interval.create(start, duration), handler, ser, params);
     }
 
     public <T extends Callback<Event>> ResponseFuture addEvent(Interval interval, T handler, SeriesID ser, Parameters params) throws Exception {

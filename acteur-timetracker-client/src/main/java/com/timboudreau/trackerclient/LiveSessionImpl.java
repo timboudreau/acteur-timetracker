@@ -6,9 +6,10 @@ import static com.mastfrog.netty.http.client.StateType.Connected;
 import static com.mastfrog.netty.http.client.StateType.Error;
 import static com.mastfrog.netty.http.client.StateType.HeadersReceived;
 import com.mastfrog.util.thread.Receiver;
+import com.mastfrog.util.time.TimeUtil;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.HttpResponse;
-import org.joda.time.DateTime;
+import java.time.ZonedDateTime;
 
 /**
  *
@@ -16,7 +17,7 @@ import org.joda.time.DateTime;
  */
 class LiveSessionImpl extends Receiver<State<?>> implements LiveSession {
 
-    private volatile DateTime remoteStart;
+    private volatile ZonedDateTime remoteStart;
     private volatile boolean closed;
     private volatile boolean started;
     private volatile Channel channel;
@@ -63,7 +64,7 @@ class LiveSessionImpl extends Receiver<State<?>> implements LiveSession {
                     if (resp != null) {
                         String dt = resp.headers().get("X-Remote-Start");
                         if (dt != null) {
-                            remoteStart = new DateTime(Long.parseLong(dt));
+                            remoteStart = TimeUtil.fromUnixTimestamp(Long.parseLong(dt));
                         }
                         trackerId = resp.headers().get("X-Tracker-ID");
                     }
@@ -83,8 +84,8 @@ class LiveSessionImpl extends Receiver<State<?>> implements LiveSession {
     }
 
     @Override
-    public DateTime getRemoteStartTime() {
-        return remoteStart == null ? DateTime.now() : remoteStart;
+    public ZonedDateTime getRemoteStartTime() {
+        return remoteStart == null ? ZonedDateTime.now() : remoteStart;
     }
 
     @Override
