@@ -51,8 +51,8 @@ public class EditUserResource extends Acteur {
 
     @Inject
     EditUserResource(@Named(USER_COLLECTION) DBCollection coll, HttpEvent evt, PasswordHasher hasher, TTUser user/*, OAuthPlugins pgns*/) throws IOException {
-        String userName = URLDecoder.decode(evt.getPath().getElement(1).toString(), "UTF-8");
-        String dn = evt.getParameter(Properties.displayName);
+        String userName = URLDecoder.decode(evt.path().getElement(1).toString(), "UTF-8");
+        String dn = evt.urlParameter(Properties.displayName);
 
         if (!userName.equals(user.name())) {
             setState(new RespondWith(Err.forbidden(user.name()

@@ -85,7 +85,7 @@ public final class TimeTrackerModule extends AbstractModule implements MongoConf
         @Override
         public BasicDBObject onQueryConstructed(HttpEvent evt, BasicDBObject obj) {
             obj.put(type, time);
-            String uid = evt.getParameter(by);
+            String uid = evt.urlParameter(by);
             if (uid != null) {
                 obj.put("by", new ObjectId(uid));
             }

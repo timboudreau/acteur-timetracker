@@ -33,7 +33,7 @@ public class SkewResource extends Acteur {
     @Inject
     SkewResource(HttpEvent evt) throws IOException {
         long now = System.currentTimeMillis();
-        Optional<Long> l = evt.getLongParameter(time);
+        Optional<Long> l = evt.longUrlParameter(time);
         Map<String, Object> m = new HashMap<>();
         m.put("received", now);
         if (l.isPresent()) {

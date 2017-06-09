@@ -52,9 +52,9 @@ public final class ModifyEventsFieldsByIdResource extends Acteur {
         query.put(type, time);
         ObjectId oid;
         try {
-            oid = new ObjectId(evt.getPath().getLastElement().toString());
+            oid = new ObjectId(evt.path().getLastElement().toString());
         } catch (Exception e) {
-            setState(new RespondWith(Err.badRequest("Not an ID: " + evt.getPath().getLastElement())));
+            setState(new RespondWith(Err.badRequest("Not an ID: " + evt.path().getLastElement())));
             return;
         }
         query.put(Properties._id, oid);

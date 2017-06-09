@@ -88,8 +88,8 @@ final class RecordTimeConnectionIsOpenResource extends Acteur implements Channel
         coll.get().insert(toWrite, WriteConcern.FSYNC_SAFE);
         ObjectId id = (ObjectId) toWrite.get(_id);
         add(XTI, id.toStringMongod());
-        if (evt.getParameter(Properties.localId) != null) {
-            add(XLI, evt.getParameter(localId));
+        if (evt.urlParameter(Properties.localId) != null) {
+            add(XLI, evt.urlParameter(localId));
         }
 
         final AtomicBoolean done = new AtomicBoolean();
@@ -139,11 +139,11 @@ final class RecordTimeConnectionIsOpenResource extends Acteur implements Channel
 
     static String buildQueryFromURLParameters(final HttpEvent evt, BasicDBObject toWrite, String... ignore) {
         Arrays.sort(ignore);
-        if (evt.getParametersAsMap().size() > AddTimeResource.MAX_PROPERTIES) {
+        if (evt.urlParametersAsMap().size() > AddTimeResource.MAX_PROPERTIES) {
             return "Too many URL parameters - max is "
                     + AddTimeResource.MAX_PROPERTIES;
         }
-        for (Map.Entry<String, String> e : evt.getParametersAsMap().entrySet()) {
+        for (Map.Entry<String, String> e : evt.urlParametersAsMap().entrySet()) {
             switch (e.getKey()) {
                 case start:
                 case end:

@@ -39,7 +39,7 @@ class GetTimeResource extends Acteur {
         // Get the list of fieldds, if any, that the caller has restricted the
         // results to - no need to pull anything over from the database we don't
         // actually need
-        String fields = evt.getParameter(Properties.fields);
+        String fields = evt.urlParameter(Properties.fields);
         DBObject projection = null;
         if (fields != null) {
             projection = new BasicDBObject();
@@ -59,7 +59,7 @@ class GetTimeResource extends Acteur {
             ok();
             // Set the response writer to be a CursorWriter, which will write out
             // the results one row at a time
-            if (evt.getMethod() != Method.HEAD && evt.getChannel().isOpen()) {
+            if (evt.method() != Method.HEAD && evt.channel().isOpen()) {
                 // Create a ResponseWriter which will write and flush one row
                 // at atime
                 CursorWriter writer = factory.create(cur);

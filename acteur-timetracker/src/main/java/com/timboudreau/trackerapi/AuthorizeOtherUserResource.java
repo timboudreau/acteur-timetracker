@@ -43,7 +43,7 @@ public class AuthorizeOtherUserResource extends Acteur {
         TTUser other = otherUser.get();
         // Should not happen
         if (other == null) {
-            setState(new RespondWith(Err.gone("No such user " + evt.getPath().getLastElement())));
+            setState(new RespondWith(Err.gone("No such user " + evt.path().getLastElement())));
             return;
         }
         // Create a query

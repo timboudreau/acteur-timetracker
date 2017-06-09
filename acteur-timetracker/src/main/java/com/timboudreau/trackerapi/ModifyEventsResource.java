@@ -54,13 +54,13 @@ public final class ModifyEventsResource extends Acteur {
         try {
             query.put(type, time);
             Body something = null;
-            boolean isDelete = evt.getMethod() == DELETE;
+            boolean isDelete = evt.method() == DELETE;
             if (!isDelete) {
                 try {
-                    something = converter.toObject(evt.getContent(), evt.getHeader(Headers.CONTENT_TYPE), Body.class);
+                    something = converter.toObject(evt.content(), evt.header(Headers.CONTENT_TYPE), Body.class);
                 } catch (JsonMappingException e) {
                     try {
-                        something = new Body(converter.toObject(evt.getContent(), evt.getHeader(Headers.CONTENT_TYPE), Map.class));
+                        something = new Body(converter.toObject(evt.content(), evt.header(Headers.CONTENT_TYPE), Map.class));
                     } catch (JsonMappingException e2) {
                         setState(new RespondWith(Err.badRequest("Bad JSON: " + e.getMessage())));
                         return;
@@ -70,7 +70,7 @@ public final class ModifyEventsResource extends Acteur {
                 something = new Body(1);
             }
             DBObject modification = new BasicDBObject(isDelete ? "$unset"
-                    : "$set", new BasicDBObject(evt.getPath().getLastElement().toString(),
+                    : "$set", new BasicDBObject(evt.path().getLastElement().toString(),
                             something.object)).append("$inc", new BasicDBObject(Properties.version, 1));
 
             WriteResult res = collection.update(query, modification, false, true, WriteConcern.ACKNOWLEDGED);

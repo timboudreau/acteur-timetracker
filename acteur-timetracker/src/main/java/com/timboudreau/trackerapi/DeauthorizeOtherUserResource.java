@@ -40,7 +40,7 @@ public class DeauthorizeOtherUserResource extends Acteur {
     DeauthorizeOtherUserResource(TTUser user, HttpEvent evt, @Named(USER_COLLECTION) DBCollection coll, @Named(Timetracker.OTHER_USER) Provider<TTUser> otherUser) {
         TTUser other = otherUser.get();
         if (other == null) {
-            setState(new RespondWith(Err.gone("No such user " + evt.getPath().getLastElement())));
+            setState(new RespondWith(Err.gone("No such user " + evt.path().getLastElement())));
             return;
         }
         BasicDBObject query = new BasicDBObject(Properties._id, user.id());

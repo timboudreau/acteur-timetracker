@@ -105,7 +105,7 @@ public class Timetracker extends GenericApplication {
     protected void onBeforeSendResponse(HttpResponseStatus status, Event<?> event, Response response, Acteur acteur, Page lockedPage) {
         // Adds cache control and content type headers to everything
         response.add(Headers.SERVER, getName());
-        Path path = ((HttpEvent) event).getPath();
+        Path path = ((HttpEvent) event).path();
         // Leave it off for html help and error responses
         if (status.code() >= 200 && status.code() < 300 && !"help".equals(path.toString())) {
             response.add(Headers.CACHE_CONTROL, CacheControl.PRIVATE_NO_CACHE_NO_STORE);

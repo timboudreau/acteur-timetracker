@@ -44,7 +44,7 @@ public class ListUsersTimeEventSetsResource extends Acteur {
     @Inject
     ListUsersTimeEventSetsResource(HttpEvent evt, Method method, DB db, TTUser user, ObjectMapper mapper) throws IOException {
         List<String> l = new ArrayList<>();
-        String pfix = new StringBuilder(evt.getPath().getElement(1).toString()).append('_').toString();
+        String pfix = new StringBuilder(evt.path().getElement(1).toString()).append('_').toString();
         for (String coll : db.getCollectionNames()) {
             if (coll.startsWith(pfix)) {
                 l.add(coll.substring(pfix.length()));

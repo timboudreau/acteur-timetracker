@@ -59,8 +59,8 @@ final class AddTimeResource extends Acteur {
         CheckParameters(HttpEvent evt) {
             try {
                 // Get the start and end parameters and check them for validity
-                Instant startTime = Instant.ofEpochMilli(evt.getLongParameter(start).get());
-                Instant endTime = Instant.ofEpochMilli(evt.getLongParameter(end).get());
+                Instant startTime = Instant.ofEpochMilli(evt.longUrlParameter(start).get());
+                Instant endTime = Instant.ofEpochMilli(evt.longUrlParameter(end).get());
                 Instant now = Instant.now();
                 Instant twentyYearsAgo = now.minus(Duration.ofDays(365 * 20));
                 // We're not building an api for world history here
@@ -83,7 +83,7 @@ final class AddTimeResource extends Acteur {
                 Interval interval = Interval.create(startTime, endTime);
                 next(interval);
             } catch (NumberFormatException e) {
-                reply(Err.badRequest("Start or end is not a number: '" + evt.getParameter(start) + "' and '" + evt.getParameter(end)));
+                reply(Err.badRequest("Start or end is not a number: '" + evt.urlParameter(start) + "' and '" + evt.urlParameter(end)));
             }
         }
     }
@@ -120,8 +120,8 @@ final class AddTimeResource extends Acteur {
         ObjectId id = (ObjectId) m.get(_id);
         if (id != null) {
             add(XTI, id.toString());
-            if (evt.getParameter(Properties.localId) != null) {
-                add(XLI, evt.getParameter(Properties.localId));
+            if (evt.urlParameter(Properties.localId) != null) {
+                add(XLI, evt.urlParameter(Properties.localId));
             }
         }
         System.out.println("MAP VERSION: " + m);

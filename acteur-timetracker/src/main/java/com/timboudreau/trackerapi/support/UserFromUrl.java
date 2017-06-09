@@ -55,7 +55,7 @@ public class UserFromUrl implements Provider<TTUser> {
     public TTUser get() {
         HttpEvent evt = event.get();
         DBCollection users = usersCollection.get();
-        String userName = evt.getPath().getElement(position).toString();
+        String userName = evt.path().getElement(position).toString();
         DBObject u = users.findOne(new BasicDBObject("name", userName));
         if (u == null) {
             return null;

@@ -44,7 +44,7 @@ class DeleteTimeEventResource extends Acteur {
             setState(new RespondWith(Err.badRequest("Empty query matches all events in series - will not do that")));
             return;
         }
-        String id = evt.getParameter(Properties._id);
+        String id = evt.urlParameter(Properties._id);
         if (id instanceof String) {
             try {
                 ObjectId oid = new ObjectId(id.toString());

@@ -48,7 +48,7 @@ public class SetPasswordResource extends Acteur {
 
     @Inject
     SetPasswordResource(@Named(USER_COLLECTION) DBCollection coll, HttpEvent evt, PasswordHasher hasher, TTUser user, String pw) throws IOException {
-        String userName = evt.getPath().getElement(1).toString();
+        String userName = evt.path().getElement(1).toString();
         if (!userName.equals(user.name())) {
             setState(new RespondWith(Err.forbidden(user.name()
                     + " cannot set the password for " + userName)));

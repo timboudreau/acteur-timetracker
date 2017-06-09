@@ -55,14 +55,14 @@ class SignUpResource extends Acteur {
 
     @Inject
     SignUpResource(@Named(USER_COLLECTION) DBCollection coll, HttpEvent evt, PasswordHasher crypto, String password) throws UnsupportedEncodingException, IOException {
-        String userName = evt.getPath().getElement(1).toString();
+        String userName = evt.path().getElement(1).toString();
         DBObject existing = coll.findOne(new BasicDBObject(name, userName), new BasicDBObject(Properties._id, true));
         if (existing != null) {
             setState(new RespondWith(Err.conflict("A user named " + userName + " exists")));
             return;
         }
         DBObject nue = new BasicDBObject(name, new String[]{userName})
-                .append(displayName, evt.getParameter(displayName))
+                .append(displayName, evt.urlParameter(displayName))
                 .append(created, TimeUtil.toUnixTimestamp(ZonedDateTime.now()))
                 .append(version, 0).append(authorizes, new ObjectId[0]);
         String encrypted = crypto.encryptPassword(password);
