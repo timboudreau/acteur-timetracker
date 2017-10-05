@@ -23,7 +23,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.19.1</version>
+                <version>2.20.1</version>
                 <configuration>
                     <parallel/>
                     <parallelMavenExecution>false</parallelMavenExecution>
@@ -33,9 +33,6 @@
                     <enableAssertions>true</enableAssertions>
                     <trimStackTrace>false</trimStackTrace>
                     <detail>true</detail>
-                    <systemPropertyVariables>
-                        <databaseSchema>MY_TEST_SCHEMA_${surefire.forkNumber}</databaseSchema>
-                    </systemPropertyVariables>
                 </configuration>
             </plugin>
         </plugins>
@@ -54,7 +51,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>acteur-mongo</artifactId>
             <scope>test</scope>
-            <version>${mastfrog.version}</version>
             <type>test-jar</type>
         </dependency>
         <dependency>
