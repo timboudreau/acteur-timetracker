@@ -23,13 +23,10 @@
  */
 package com.timboudreau.trackerclient;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mastfrog.giulius.tests.GuiceRunner;
 import com.mastfrog.giulius.tests.TestWith;
-import com.mastfrog.util.collections.MapBuilder;
 import com.mastfrog.util.time.TimeUtil;
-import com.mastfrog.webapi.Interpolator;
 import com.mastfrog.webapi.Interpreter;
 import com.mongodb.BasicDBObject;
 import static com.timboudreau.trackerapi.Properties.added;
@@ -49,11 +46,9 @@ import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.HttpHeaders;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
-import java.io.IOException;
 import java.io.OutputStream;
-import java.time.Duration;
 import java.time.Instant;
-import java.time.ZonedDateTime;
+import java.time.temporal.ChronoField;
 import java.util.regex.Pattern;
 import org.bson.types.ObjectId;
 import static org.junit.Assert.assertEquals;
@@ -107,7 +102,7 @@ public class EventSerializationTest {
 //        System.out.println("\n\n\n" + s + "\n\n\n");
 //        Event found = mapper.readValue(s, Event.class);
 //        assertEquals(e, found);
-        Instant inst = Instant.now();
+        Instant inst = Instant.now().with(ChronoField.MICRO_OF_SECOND, 0);
         BasicDBObject toWrite = new BasicDBObject(type, time)
                 .append(start, 1)
                 .append(end, 101)
