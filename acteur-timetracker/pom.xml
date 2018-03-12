@@ -87,7 +87,7 @@
         <pluginRepository>
             <id>timboudreau-plugins</id>
             <name>timboudreau.com plugins</name>
-            <url>http://timboudreau.com/builds/plugin/repository/everything/</url>
+            <url>https://timboudreau.com/maven/</url>
             <releases>
                 <enabled>true</enabled>
                 <updatePolicy>never</updatePolicy>
