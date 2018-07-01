@@ -8,8 +8,6 @@ import com.mastfrog.giulius.tests.GuiceRunner;
 import com.mastfrog.giulius.tests.TestWith;
 import com.mastfrog.netty.http.client.ResponseFuture;
 import com.mastfrog.netty.http.client.State;
-import com.mastfrog.netty.http.client.State.FullContentReceived;
-import com.mastfrog.util.Streams;
 import com.mastfrog.util.thread.Receiver;
 import com.mastfrog.util.time.Interval;
 import com.mastfrog.util.time.TimeUtil;
@@ -26,8 +24,6 @@ import com.timboudreau.trackerclient.pojos.Totals;
 import com.timboudreau.trackerclient.pojos.User;
 import com.timboudreau.trackerclient.pojos.UserID;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufInputStream;
-import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.CharsetUtil;
@@ -35,7 +31,6 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
-import java.time.temporal.ChronoUnit;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -60,16 +55,19 @@ public class TrackerAPITest {
     private static int currPort = 57000;
     private MongoHarness harn;
 
+    static {
+        System.setProperty("acteur.debug", "true");
+    }
+
     private void initServer(MongoHarness harn, DB db) throws IOException, InterruptedException {
         this.harn = harn;
         int mongoPort = harn.port();
         int port = currPort++;
         System.out.println("Start server on " + port + " with mongodb on ");
-        System.out.flush();
         ServerControl ctrl = Timetracker.start("--mongoPort", mongoPort + "", "--port", "" + port);
-        System.err.flush();
         deps = Dependencies.builder().add(
-                new TrackerModule("http://localhost:" + port)).build();
+                new TrackerModule("http://localhost:" + port))
+                .build();
         spi = deps.getInstance(TrackerClientSPI.class);
     }
 
@@ -98,8 +96,8 @@ public class TrackerAPITest {
         ResponseFuture fut = hu.future = spi.signup(un, "Moby Nightmare", "mobybaby", hu);
         fut.await();
         sess = hu.await();
+        Thread.sleep(3000);
         assertNotNull(sess);
-//        Thread.sleep(3000);
 //        assertEquals(CREATED, hu.status);
 
         final long now = TimeUtil.toUnixTimestamp(ZonedDateTime.now().with(ChronoField.SECOND_OF_MINUTE, 0).with(ChronoField.MILLI_OF_SECOND, 0));

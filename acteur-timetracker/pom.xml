@@ -4,8 +4,8 @@
     <artifactId>trackerapi</artifactId>
     <parent>
         <groupId>com.mastfrog</groupId>
-        <artifactId>mastfrog-parent</artifactId>
-        <version>2.4.1</version>
+        <artifactId>mastfrog-parent-indexed</artifactId>
+        <version>2.5.0-dev</version>
         <relativePath/>
     </parent>
     <name>Time Tracker Web API</name>

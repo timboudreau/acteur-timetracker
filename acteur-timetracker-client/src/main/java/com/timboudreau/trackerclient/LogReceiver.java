@@ -20,11 +20,9 @@ class LogReceiver extends Receiver<State<?>> {
 
     @Override
     public void receive(State<?> state) {
-        System.out.println(call + " -> " + state + (state.get() == null ? "" : " - " + state.get()));
         if (state.get() instanceof FullHttpResponse) {
             FullHttpResponse r = (FullHttpResponse) state.get();
-            System.out.println(r.getStatus() + " " + call);
-            if (r.getStatus().code() > 399) {
+            if (r.status().code() > 399) {
                 ByteBuf b = r.content();
                 if (b.isReadable() && b.readableBytes() > 0) {
                     byte[] bb = new byte[b.readableBytes()];

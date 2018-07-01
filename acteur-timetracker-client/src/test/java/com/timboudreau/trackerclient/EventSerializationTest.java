@@ -44,7 +44,7 @@ import com.timboudreau.trackerclient.pojos.OtherID;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.EmptyHttpHeaders;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import java.io.OutputStream;
 import java.time.Instant;
@@ -64,10 +64,6 @@ import org.junit.runner.RunWith;
 @TestWith(TrackerModule.class)
 public class EventSerializationTest {
 
-    /*
-<Event{interval=01:00.000 from 2017-05-31T19:20:00.851Z to 2017-05-31T19:21:00.851Z, id=foo, duration=PT1M, created=2017-05-31T15:30:00.851-04:00[America/New_York], createdBy=bar, added=2017-05-31T15:30:02.851-04:00[America/New_York], version=1, type=wug, metadata={a=b}, tags=tag1,tag2}>
- Event{interval=01:00.000 from 2017-05-31T19:20:00.851Z to 2017-05-31T19:21:00.851Z, id=foo, duration=PT1M, created=2017-05-31T15:30:00.851-04:00[America/New_York], createdBy=bar, added=2017-05-31T15:30:02.851-04:00[America/New_York], version=1, type=wug, metadata={a=b, empty=false, endMillis=1496258460851, startMillis=1496258400851}, tags=tag1,tag2}>
-     */
     private static final Pattern QUOTED_STRING = Pattern.compile("^\".*\"$");
 
     @Test
@@ -82,7 +78,6 @@ public class EventSerializationTest {
 
         OtherID oid = new OtherID("bar");
         String s = mapper.writeValueAsString(oid);
-        System.out.println("OID -> " + s);
         OtherID test = mapper.readValue(s, OtherID.class);
         assertEquals(oid, test);
 
@@ -90,18 +85,6 @@ public class EventSerializationTest {
 
     @Test
     public void test(ObjectMapper mapper, Interpreter interp) throws Throwable {
-
-//        ZonedDateTime now = ZonedDateTime.now();
-//        ZonedDateTime str = now.minus(Duration.ofMinutes(10));
-//        ZonedDateTime then = str.plus(Duration.ofMinutes(1));
-//        Event e = new Event(TimeUtil.toUnixTimestamp(str), TimeUtil.toUnixTimestamp(then), new EventID("foo"),
-//                now, new OtherID("bar"), now.plusSeconds(2), 1, Duration.between(str, then), "wug", new MapBuilder().put("a", "b").build(),
-//                new String[]{"tag1", "tag2"}, false, new EventID[]{new EventID("x"), new EventID("y")});
-//
-//        String s = mapper.writeValueAsString(e);
-//        System.out.println("\n\n\n" + s + "\n\n\n");
-//        Event found = mapper.readValue(s, Event.class);
-//        assertEquals(e, found);
         Instant inst = Instant.now().with(ChronoField.MICRO_OF_SECOND, 0);
         BasicDBObject toWrite = new BasicDBObject(type, time)
                 .append(start, 1)
@@ -119,8 +102,7 @@ public class EventSerializationTest {
             mapper.writeValue((OutputStream) out, toWrite);
         }
 
-        Event evt = interp.interpret(OK, HttpHeaders.EMPTY_HEADERS, buf, Event.class);
-        System.out.println("EVENT: " + evt);
+        Event evt = interp.interpret(OK, EmptyHttpHeaders.INSTANCE, buf, Event.class);
         assertEquals(1, TimeUtil.toUnixTimestamp(evt.start));
         assertEquals(101, TimeUtil.toUnixTimestamp(evt.end));
         assertEquals("foob", evt.createdBy.name);
