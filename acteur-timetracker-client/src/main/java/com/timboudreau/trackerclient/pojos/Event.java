@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.google.common.collect.Maps;
-import com.mastfrog.util.Strings;
+import com.mastfrog.util.strings.Strings;
 import com.mastfrog.util.time.Interval;
 import com.mastfrog.util.time.MutableInterval;
 import com.mastfrog.util.time.ReadableInterval;

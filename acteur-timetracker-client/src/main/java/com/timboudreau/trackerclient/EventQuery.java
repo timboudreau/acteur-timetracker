@@ -1,7 +1,7 @@
 package com.timboudreau.trackerclient;
 
 import com.mastfrog.netty.http.client.HttpRequestBuilder;
-import com.mastfrog.util.Exceptions;
+import com.mastfrog.util.preconditions.Exceptions;
 import com.mastfrog.util.time.TimeUtil;
 import com.timboudreau.trackerclient.pojos.EventID;
 import java.io.UnsupportedEncodingException;
