@@ -109,6 +109,10 @@
         <connection>scm:git:https://github.com/timboudreau/acteur-timetracker.git</connection>
         <developerConnection>git@github.com/timboudreau/acteur-timetracker.git</developerConnection>
     </scm>
+    <organization>
+        <name>Mastfrog Technologies</name>
+        <url>https://mastfrog.com</url>
+    </organization>
     <licenses>
         <license>
             <name>MIT</name>
