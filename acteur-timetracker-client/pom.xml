@@ -8,6 +8,7 @@
         <relativePath/>
     </parent>
     <artifactId>trackerclient</artifactId>
+    <url>https://github.com/timboudreau/acteur-timetracker</url>
     <name>Time Tracker API Client</name>
     <build>
         <plugins>
@@ -105,10 +106,11 @@
         <url>https://github.com/timboudreau/acteur-timetracker/issues</url>
     </issueManagement>
     <scm>
-        <url>https://github.com/timboudreau/acteur-timetracker</url>
+        <url>https://github.com/timboudreau/acteur-timetracker.git</url>
         <connection>scm:git:https://github.com/timboudreau/acteur-timetracker.git</connection>
         <developerConnection>git@github.com/timboudreau/acteur-timetracker.git</developerConnection>
     </scm>
+    
     <organization>
         <name>Mastfrog Technologies</name>
         <url>https://mastfrog.com</url>
@@ -116,7 +118,8 @@
     <licenses>
         <license>
             <name>MIT</name>
-            <url>http://opensource.org/licenses/MIT</url>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
         </license>
     </licenses>
     <developers>
