@@ -17,7 +17,6 @@ import com.mastfrog.acteur.annotations.GenericApplication;
 import com.mastfrog.acteur.headers.Headers;
 import com.mastfrog.acteur.mongo.util.UpdateBuilder;
 import com.mastfrog.acteur.preconditions.Description;
-import com.mastfrog.acteur.server.PathFactory;
 import com.mastfrog.acteur.server.ServerBuilder;
 import com.mastfrog.acteur.util.CacheControl;
 import com.mastfrog.acteur.util.PasswordHasher;
@@ -79,7 +78,7 @@ public class Timetracker extends GenericApplication {
         Settings settings = SettingsBuilder.forNamespace(TIMETRACKER)
                 .add("port", "7739")
                 .addDefaultLocations()
-                .add(PathFactory.BASE_PATH_SETTINGS_KEY, "time")
+//                .add(ServerModule.SETTINGS_KEY_BASE_PATH, "time")
                 .parseCommandLineArguments(args)
                 .add(loadVersionProperties())
                 .build();
