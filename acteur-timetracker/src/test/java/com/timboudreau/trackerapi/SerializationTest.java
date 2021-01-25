@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
 import com.mastfrog.acteur.server.ServerModule;
 import com.mastfrog.giulius.tests.GuiceRunner;
+import com.mastfrog.giulius.tests.IfBinaryAvailable;
 import com.mastfrog.giulius.tests.TestWith;
 import com.mastfrog.jackson.DurationSerializationMode;
 import com.mastfrog.jackson.TimeSerializationMode;
@@ -54,6 +55,7 @@ import org.junit.runner.RunWith;
  */
 @RunWith(GuiceRunner.class)
 @TestWith(TestConfig.class)
+@IfBinaryAvailable("mongod")
 public class SerializationTest {
 
     @Test
@@ -65,15 +67,14 @@ public class SerializationTest {
                 .append(added, Instant.now().toEpochMilli())
                 .append(by, "foob")
                 .append(version, 0);
-        
+
         ObjectId id = new ObjectId();
         toWrite.append("_id", id);
-        
+
         String ids = mapper.writeValueAsString(id);
         assertTrue("ID serialized should look like a quoted string, not '" + ids + "'", ids.startsWith("\""));
-        assertTrue("ID serialized should look like a quoted string, not '" + ids + "'",ids.endsWith("\""));
+        assertTrue("ID serialized should look like a quoted string, not '" + ids + "'", ids.endsWith("\""));
         System.out.println(mapper.writeValueAsString(toWrite));
-        
 
     }
 
