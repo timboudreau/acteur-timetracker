@@ -5,6 +5,7 @@ import com.mastfrog.acteur.mongo.MongoModule;
 import com.mastfrog.acteur.util.ServerControl;
 import com.mastfrog.giulius.Dependencies;
 import com.mastfrog.giulius.tests.GuiceRunner;
+import com.mastfrog.giulius.tests.IfBinaryAvailable;
 import com.mastfrog.giulius.tests.TestWith;
 import com.mastfrog.netty.http.client.ResponseFuture;
 import com.mastfrog.netty.http.client.State;
@@ -45,6 +46,7 @@ import org.junit.runner.RunWith;
  */
 @RunWith(GuiceRunner.class)
 @TestWith({MongoHarness.Module.class, MongoModule.class})
+@IfBinaryAvailable("mongod")
 public class TrackerAPITest {
 
     Dependencies deps;
