@@ -25,6 +25,9 @@ open module com.mastfrog.trackerclient {
     // Inferred from source scan
     requires com.mastfrog.time;
 
+    // Transitive detected by source scan
+    requires com.mastfrog.trackerapi;
+
     // Inferred from source scan
     requires com.mastfrog.util.function;
 
@@ -33,5 +36,8 @@ open module com.mastfrog.trackerclient {
 
     // derived from com.fasterxml.jackson.core/jackson-core-0.0.0-? in com/fasterxml/jackson/core/jackson-core/2.9.9/jackson-core-2.9.9.pom
     requires transitive jackson.core;
+
+    // Inferred from test-source-scan
+    requires transitive junit;
 
 }

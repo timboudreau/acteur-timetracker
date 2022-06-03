@@ -40,6 +40,9 @@ open module com.mastfrog.trackerapi {
     // derived from org.javassist/javassist-3.28.0-GA in org/javassist/javassist/3.28.0-GA/javassist-3.28.0-GA.pom
     requires transitive javassist.3.28.0.GA;
 
+    // Inferred from test-source-scan
+    requires transitive junit;
+
     // derived from org.mongodb/mongo-java-driver-0.0.0-? in org/mongodb/mongo-java-driver/3.12.11/mongo-java-driver-3.12.11.pom
     requires transitive mongo.java.driver.3.12.11;
 
