@@ -1,30 +1,30 @@
 package com.timboudreau.trackerapi;
 
-import com.google.common.net.MediaType;
 import com.google.inject.Binder;
 import com.google.inject.Inject;
 import com.google.inject.Module;
 import com.google.inject.name.Named;
 import com.mastfrog.acteur.Acteur;
-import com.mastfrog.giulius.annotations.Defaults;
-import com.mastfrog.giulius.annotations.Namespace;
 import com.mastfrog.acteur.Event;
 import com.mastfrog.acteur.Help;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.Page;
 import com.mastfrog.acteur.Response;
 import com.mastfrog.acteur.annotations.GenericApplication;
+import com.mastfrog.acteur.header.entities.CacheControl;
 import com.mastfrog.acteur.headers.Headers;
 import com.mastfrog.acteur.mongo.util.UpdateBuilder;
 import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.server.ServerBuilder;
-import com.mastfrog.acteur.util.CacheControl;
 import com.mastfrog.acteur.util.PasswordHasher;
 import com.mastfrog.acteur.util.Server;
 import com.mastfrog.acteur.util.ServerControl;
-import com.mastfrog.jackson.DurationSerializationMode;
+import com.mastfrog.giulius.annotations.Defaults;
+import com.mastfrog.giulius.annotations.Namespace;
 import com.mastfrog.jackson.JacksonModule;
-import com.mastfrog.jackson.TimeSerializationMode;
+import com.mastfrog.jackson.configuration.DurationSerializationMode;
+import com.mastfrog.jackson.configuration.TimeSerializationMode;
+import com.mastfrog.mime.MimeType;
 import com.mastfrog.settings.Settings;
 import com.mastfrog.settings.SettingsBuilder;
 import com.mastfrog.url.Path;
@@ -108,7 +108,7 @@ public class Timetracker extends GenericApplication {
         // Leave it off for html help and error responses
         if (status.code() >= 200 && status.code() < 300 && !"help".equals(path.toString())) {
             response.add(Headers.CACHE_CONTROL, CacheControl.PRIVATE_NO_CACHE_NO_STORE);
-            response.add(Headers.CONTENT_TYPE, MediaType.JSON_UTF_8);
+            response.add(Headers.CONTENT_TYPE, MimeType.JSON_UTF_8);
         }
     }
 

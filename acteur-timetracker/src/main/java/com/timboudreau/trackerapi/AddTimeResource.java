@@ -18,21 +18,21 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.WriteConcern;
 import com.timboudreau.trackerapi.AddTimeResource.CheckParameters;
-import com.timboudreau.trackerapi.support.CreateCollectionPolicy;
-import com.timboudreau.trackerapi.support.TTUser;
-import com.timboudreau.trackerapi.support.TimeCollectionFinder;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import java.io.IOException;
-import java.util.Map;
-import org.bson.types.ObjectId;
 import static com.timboudreau.trackerapi.Properties.*;
 import static com.timboudreau.trackerapi.RecordTimeConnectionIsOpenResource.XLI;
 import static com.timboudreau.trackerapi.RecordTimeConnectionIsOpenResource.XTI;
 import static com.timboudreau.trackerapi.RecordTimeConnectionIsOpenResource.buildQueryFromURLParameters;
 import com.timboudreau.trackerapi.support.AuthorizedChecker;
+import com.timboudreau.trackerapi.support.CreateCollectionPolicy;
+import com.timboudreau.trackerapi.support.TTUser;
+import com.timboudreau.trackerapi.support.TimeCollectionFinder;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
+import org.bson.types.ObjectId;
 
 /**
  * Adds a time entry

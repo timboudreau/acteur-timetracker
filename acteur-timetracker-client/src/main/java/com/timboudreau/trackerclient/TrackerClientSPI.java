@@ -2,7 +2,7 @@ package com.timboudreau.trackerclient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
-import com.mastfrog.acteur.util.BasicCredentials;
+import com.mastfrog.acteur.header.entities.BasicCredentials;
 import com.mastfrog.giulius.scope.ReentrantScope;
 import com.mastfrog.netty.http.client.ResponseFuture;
 import com.mastfrog.netty.http.client.State;

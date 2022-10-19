@@ -1,11 +1,7 @@
 package com.timboudreau.trackerapi;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.mastfrog.acteur.Acteur;
-import com.mastfrog.acteur.ActeurFactory;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.annotations.HttpCall;
 import static com.mastfrog.acteur.headers.Method.GET;
@@ -18,6 +14,7 @@ import com.timboudreau.trackerapi.support.TTUser;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  *

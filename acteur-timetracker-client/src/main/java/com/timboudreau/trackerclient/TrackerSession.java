@@ -1,7 +1,7 @@
 package com.timboudreau.trackerclient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mastfrog.acteur.util.BasicCredentials;
+import com.mastfrog.acteur.header.entities.BasicCredentials;
 import com.mastfrog.netty.http.client.ResponseFuture;
 import com.mastfrog.util.time.Interval;
 import com.mastfrog.webapi.Callback;

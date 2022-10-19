@@ -1,13 +1,12 @@
 package com.timboudreau.trackerapi;
 
-import com.timboudreau.trackerapi.support.Intervals;
 import com.google.inject.Inject;
 import com.mastfrog.acteur.Acteur;
 import com.mastfrog.acteur.HttpEvent;
 import com.mastfrog.acteur.annotations.HttpCall;
 import com.mastfrog.acteur.annotations.Precursors;
+import com.mastfrog.acteur.preconditions.Authenticated;
 import com.mastfrog.acteur.preconditions.BannedUrlParameters;
-import com.mastfrog.acteur.preconditions.BasicAuth;
 import com.mastfrog.acteur.preconditions.Description;
 import com.mastfrog.acteur.preconditions.PathRegex;
 import com.mastfrog.util.time.Interval;
@@ -15,19 +14,20 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import com.timboudreau.trackerapi.support.CreateCollectionPolicy;
-import com.timboudreau.trackerapi.support.TimeCollectionFinder;
-import java.io.IOException;
 import static com.timboudreau.trackerapi.Properties.*;
 import static com.timboudreau.trackerapi.TotalTimeResource.PAT;
 import com.timboudreau.trackerapi.support.AuthorizedChecker;
+import com.timboudreau.trackerapi.support.CreateCollectionPolicy;
+import com.timboudreau.trackerapi.support.Intervals;
+import com.timboudreau.trackerapi.support.TimeCollectionFinder;
+import java.io.IOException;
 
 /**
  *
  * @author Tim Boudreau
  */
 @HttpCall
-@BasicAuth
+@Authenticated
 @PathRegex(PAT)
 @BannedUrlParameters("type")
 @Precursors({AuthorizedChecker.class, CreateCollectionPolicy.DontCreatePolicy.class, TimeCollectionFinder.class})

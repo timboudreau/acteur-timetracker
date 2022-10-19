@@ -27,7 +27,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.mastfrog.acteur.auth.Authenticator;
-import com.mastfrog.acteur.util.BasicCredentials;
+import com.mastfrog.acteur.header.entities.BasicCredentials;
 import com.mastfrog.acteur.util.PasswordHasher;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;

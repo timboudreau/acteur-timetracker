@@ -16,11 +16,11 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.WriteConcern;
 import com.mongodb.WriteResult;
+import static com.timboudreau.trackerapi.Properties.*;
+import com.timboudreau.trackerapi.support.AuthorizedChecker;
 import com.timboudreau.trackerapi.support.CreateCollectionPolicy;
 import com.timboudreau.trackerapi.support.TimeCollectionFinder;
 import java.io.IOException;
-import static com.timboudreau.trackerapi.Properties.*;
-import com.timboudreau.trackerapi.support.AuthorizedChecker;
 import org.bson.types.ObjectId;
 
 /**
