@@ -25,8 +25,8 @@ package com.timboudreau.trackerclient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mastfrog.giulius.tests.GuiceRunner;
-import com.mastfrog.giulius.tests.IfBinaryAvailable;
-import com.mastfrog.giulius.tests.TestWith;
+import com.mastfrog.giulius.tests.anno.IfBinaryAvailable;
+import com.mastfrog.giulius.tests.anno.TestWith;
 import com.mastfrog.util.time.TimeUtil;
 import com.mastfrog.webapi.Interpreter;
 import com.mongodb.BasicDBObject;
