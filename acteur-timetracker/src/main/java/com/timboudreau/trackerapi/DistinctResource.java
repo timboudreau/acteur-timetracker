@@ -32,7 +32,7 @@ public class DistinctResource extends Acteur {
 
     @Inject
     DistinctResource(HttpEvent evt, DBCollection coll) {
-        String field = evt.getParameter("field");
+        String field = evt.urlParameter("field");
         ok(coll.distinct(field));
     }
 }

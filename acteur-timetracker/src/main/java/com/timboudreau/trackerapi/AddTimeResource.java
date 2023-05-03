@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Optional;
 import org.bson.types.ObjectId;
 
 /**
@@ -59,8 +60,12 @@ final class AddTimeResource extends Acteur {
         CheckParameters(HttpEvent evt) {
             try {
                 // Get the start and end parameters and check them for validity
-                Instant startTime = Instant.ofEpochMilli(evt.longUrlParameter(start).get());
-                Instant endTime = Instant.ofEpochMilli(evt.longUrlParameter(end).get());
+                Optional<Long> result1
+                        = evt.uriQueryParameter(start, Long.class);
+                Instant startTime = Instant.ofEpochMilli(result1.get());
+                Optional<Long> result
+                        = evt.uriQueryParameter(end, Long.class);
+                Instant endTime = Instant.ofEpochMilli(result.get());
                 Instant now = Instant.now();
                 Instant twentyYearsAgo = now.minus(Duration.ofDays(365 * 20));
                 // We're not building an api for world history here
@@ -103,7 +108,7 @@ final class AddTimeResource extends Acteur {
                 .append(added, Instant.now().toEpochMilli())
                 .append(by, user.idAsString())
                 .append(version, 0);
-        
+
         System.out.println("WILL WRITE " + toWrite);
 
         // Add the other URL properties to the BasicDBObject, returning an
