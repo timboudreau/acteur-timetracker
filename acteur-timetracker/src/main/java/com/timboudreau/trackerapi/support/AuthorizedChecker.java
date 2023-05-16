@@ -19,7 +19,7 @@ public class AuthorizedChecker extends Acteur {
             setState(new RespondWith(Err.forbidden(authUser.name()
                     + " not allowed access to data belonging to " + otherUser.name() + "\n")));
         } else {
-            setState(new ConsumedState());
+            next();
         }
     }
 }
